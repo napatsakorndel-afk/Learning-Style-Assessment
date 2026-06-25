@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CogniStyle | แบบทดสอบวิเคราะห์สไตล์การเรียนรู้</title>
+  
+  <!-- Google Fonts: Inter & Prompt (Thai) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              300: '#c084fc',
+              400: '#a855f7',
+              500: '#8b5cf6', // Purple-primary
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+            },
+          },
+          animation: {
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'float-delayed': 'float 6s ease-in-out 3s infinite',
+            'radar-pulse': 'radar-pulse 2s infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-15px)' },
+            },
+            'radar-pulse': {
+              '0%': { transform: 'scale(0.95)', opacity: '0.5' },
+              '50%': { transform: 'scale(1.05)', opacity: '0.8' },
+              '100%': { transform: 'scale(0.95)', opacity: '0.5' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom styles for transitions and special effects -->
+  <style type="text/css">
+    body {
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass-card {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .glass-input {
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass-input {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    /* Smooth page state transitions */
+    .app-screen {
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .screen-hidden {
+      opacity: 0;
+      transform: translateY(15px);
+      pointer-events: none;
+      position: absolute;
+      width: 100%;
+    }
+    .screen-visible {
+      opacity: 1;
+      transform: translateY(0);
+      position: relative;
+    }
+    /* Quiz slide transitions */
+    .question-slide {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .slide-out-left {
+      opacity: 0;
+      transform: translateX(-40px);
+    }
+    .slide-in-right {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+    /* Print utility */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        background: transparent !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-300">
+
+  <!-- Ambient background elements -->
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-brand-500/10 dark:bg-brand-500/5 blur-[120px] animate-float"></div>
+    <div class="absolute top-1/3 -right-40 w-[600px] h-[600px] rounded-full bg-purple-500/10 dark:bg-purple-500/5 blur-[140px] animate-float-delayed"></div>
+    <div class="absolute -bottom-40 left-1/4 w-[500px] h-[500px] rounded-full bg-blue-500/10 dark:bg-blue-500/5 blur-[100px] animate-float"></div>
+  </div>
+
+  <!-- Header / Navigation Bar -->
+  <header class="sticky top-0 z-50 glass-card transition-all duration-300 border-b no-print">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="resetQuiz(true)">
+        <span class="text-3xl animate-pulse-slow">🧠</span>
+        <span class="text-xl font-bold bg-gradient-to-r from-brand-600 to-purple-500 dark:from-brand-400 dark:to-purple-300 bg-clip-text text-transparent">CogniStyle</span>
+      </div>
+      
+      <!-- Theme Switcher -->
+      <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300/30 dark:border-slate-700/30 transition-all duration-200 focus:outline-none" aria-label="Toggle Theme">
+        <!-- Sun Icon (Visible in dark) -->
+        <svg id="sunIcon" class="w-5 h-5 text-amber-500 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m14.071-7.071l-.707.707M6.343 17.657l-.707.707m2.828-9.9a5 5 0 117.071 7.071 5 5 0 01-7.071-7.071z"/>
+        </svg>
+        <!-- Moon Icon (Visible in light) -->
+        <svg id="moonIcon" class="w-5 h-5 text-indigo-600 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Application Container -->
+  <main class="flex-grow flex items-center justify-center p-4 max-w-6xl w-full mx-auto relative overflow-hidden">
+    
+    <!-- 1. LANDING SCREEN -->
+    <div id="landingScreen" class="app-screen screen-visible w-full max-w-4xl mx-auto py-8 md:py-16">
+      <div class="text-center space-y-6">
+        <div class="inline-flex items-center space-x-2 px-4 py-2 rounded-full glass-card border border-brand-500/20 text-brand-600 dark:text-brand-300 text-sm font-medium">
+          <span>✨</span>
+          <span>ค้นหาศักยภาพที่ซ่อนอยู่ในการประมวลผลข้อมูลของสมอง</span>
+        </div>
+        
+        <h1 class="text-4xl md:text-6xl font-bold tracking-tight leading-tight">
+          คุณคือผู้เรียนรู้สายไหน?<br>
+          <span class="bg-gradient-to-r from-brand-500 via-purple-500 to-indigo-500 dark:from-brand-400 dark:via-purple-300 dark:to-indigo-300 bg-clip-text text-transparent">
+            ค้นพบอาวุธลับทางปัญญาของคุณ
+          </span>
+        </h1>
+        
+        <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto font-light leading-relaxed">
+          ร่วมค้นหาช่องทางการรับรู้ข้อมูลด้วยโมเดลวิชาการ <strong class="font-medium text-slate-800 dark:text-slate-200">VARK Model</strong> ควบคู่กับวงจรการเรียนรู้อย่างลึกซึ้งตามทฤษฎี <strong class="font-medium text-slate-800 dark:text-slate-200">Kolb's Experiential Learning</strong> ผ่านสถานการณ์จำลองในชีวิตจริง
+        </p>
+
+        <!-- Feature Badges -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 max-w-3xl mx-auto text-left">
+          <div onclick="showTheoryScreen('vark')" class="p-4 rounded-2xl glass-card hover:scale-[1.02] hover:border-brand-500/50 cursor-pointer transition-all duration-200 group relative">
+            <div class="absolute top-2.5 right-3 text-[9px] font-bold text-brand-600 dark:text-brand-400 opacity-0 group-hover:opacity-100 transition-opacity">อ่านทฤษฎี 💡</div>
+            <div class="text-2xl mb-2">👁️</div>
+            <h3 class="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">VARK Model</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">วิเคราะห์ช่องทางประสาทสัมผัสหลัก 4 ด้าน</p>
+          </div>
+          <div onclick="showTheoryScreen('kolb')" class="p-4 rounded-2xl glass-card hover:scale-[1.02] hover:border-brand-500/50 cursor-pointer transition-all duration-200 group relative">
+            <div class="absolute top-2.5 right-3 text-[9px] font-bold text-brand-600 dark:text-brand-400 opacity-0 group-hover:opacity-100 transition-opacity">อ่านทฤษฎี 💡</div>
+            <div class="text-2xl mb-2">🔄</div>
+            <h3 class="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">Kolb's Theory</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">วิเคราะห์ขั้นตอนการประมวลความคิดและตอบสนอง</p>
+          </div>
+          <div class="p-4 rounded-2xl glass-card hover:scale-[1.02] transition-transform duration-200">
+            <div class="text-2xl mb-2">🧠</div>
+            <h3 class="font-semibold text-slate-900 dark:text-slate-100">Scenario-based</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">วิเคราะห์จากพฤติกรรมจริงในสถานการณ์สมมติ</p>
+          </div>
+          <div class="p-4 rounded-2xl glass-card hover:scale-[1.02] transition-transform duration-200">
+            <div class="text-2xl mb-2">📈</div>
+            <h3 class="font-semibold text-slate-900 dark:text-slate-100">Action Plan</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">รับคำแนะนำและการพัฒนาตนเองเฉพาะบุคคล</p>
+          </div>
+        </div>
+
+        <!-- Name Input Section -->
+        <div class="max-w-md mx-auto pt-6 space-y-4">
+          <div class="text-left">
+            <label for="userName" class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2 ml-1">กรอกชื่อของคุณ (สำหรับออกรายงานผลลัพธ์):</label>
+            <input type="text" id="userName" placeholder="เช่น กวิน, ลลิตา..." class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all outline-none text-center font-medium placeholder-slate-400 text-slate-800 dark:text-slate-100">
+          </div>
+          
+          <button onclick="startQuiz()" class="w-full md:w-auto px-10 py-4 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-brand-500/20 active:scale-95 transition-all duration-150 text-base md:text-lg flex items-center justify-center space-x-2 mx-auto">
+            <span>เริ่มแบบทดสอบ</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+            </svg>
+          </button>
+
+          <!-- Disclaimer Alert -->
+          <div class="text-[11px] text-slate-400 dark:text-slate-500 max-w-sm mx-auto font-light leading-relaxed pt-2">
+            ⚠️ <strong>คำชี้แจง:</strong> แบบทดสอบนี้อาจมีข้อผิดพลาดได้ โปรดใช้วิจารณญาณในการประเมินและนำคำแนะนำไปประยุกต์ใช้ในการเรียนรู้และการทำงานจริง
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1.5 THEORY LEARNING SCREEN -->
+    <div id="theoryScreen" class="app-screen screen-hidden w-full max-w-4xl mx-auto py-6 space-y-6">
+      <!-- Back button and title -->
+      <div class="flex items-center space-x-4">
+        <button onclick="showScreen('landingScreen')" class="px-4 py-2 text-sm rounded-lg border border-slate-300/30 dark:border-slate-800/50 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition duration-150 flex items-center space-x-1.5 focus:outline-none">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          <span>กลับหน้าแรก</span>
+        </button>
+        <h2 class="text-xl font-bold bg-gradient-to-r from-brand-600 to-purple-600 dark:from-brand-400 dark:to-purple-400 bg-clip-text text-transparent">คลังความรู้ทฤษฎีการเรียนรู้</h2>
+      </div>
+
+      <!-- Theory Tabs -->
+      <div class="glass-card rounded-2xl p-1.5 border flex">
+        <button id="tabBtnVark" onclick="switchTheoryTab('vark')" class="w-1/3 py-3 text-center border-b-2 border-brand-500 text-brand-600 dark:text-brand-400 text-xs sm:text-sm font-bold transition-all">
+          🎨 VARK Model
+        </button>
+        <button id="tabBtnKolb" onclick="switchTheoryTab('kolb')" class="w-1/3 py-3 text-center border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 text-xs sm:text-sm font-semibold transition-all">
+          🔄 Kolb's Cycle
+        </button>
+        <button id="tabBtnRef" onclick="switchTheoryTab('ref')" class="w-1/3 py-3 text-center border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 text-xs sm:text-sm font-semibold transition-all">
+          📚 อ้างอิงวิชาการ
+        </button>
+      </div>
+
+      <!-- Tab Content 1: VARK -->
+      <div id="theoryVarkContent" class="space-y-6">
+        <div class="glass-card p-6 md:p-8 rounded-3xl border shadow-lg space-y-4">
+          <h3 class="text-lg font-bold text-brand-600 dark:text-brand-400">VARK Model คืออะไร?</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
+            พัฒนาโดย <strong>Neil Fleming</strong> ในปี ค.ศ. 1987 เป็นโมเดลที่อธิบายลักษณะเด่นของประสาทสัมผัสในการรับและประมวลผลข้อมูล (Sensory Modalities) โดยแบ่งคนตามช่องทางเรียนรู้หลัก 4 ด้าน เพื่อช่วยให้เข้าใจความชอบส่วนตัวในการรับรู้และถกเถียงข้อมูลรอบตัว
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+            <!-- V -->
+            <div class="p-5 rounded-2xl bg-blue-500/5 border border-blue-500/10 space-y-2">
+              <div class="flex items-center space-x-2 text-blue-600 dark:text-blue-400">
+                <span class="text-2xl">👁️</span>
+                <h4 class="font-bold">Visual (V) - การเรียนรู้ผ่านการมองเห็น</h4>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-light leading-relaxed">
+                ชอบข้อมูลที่จัดระเบียบเป็นแผนภูมิ แผนผัง รหัสสี และสไลด์นำเสนอที่สะอาดตา จดจำสิ่งแวดล้อมเชิงตำแหน่งและพื้นที่รูปทรงได้ดีเป็นพิเศษ
+              </p>
+              <div class="text-[11px] text-blue-600 dark:text-blue-400 font-medium">
+                <strong>เครื่องมือที่แนะนำ:</strong> แผนภาพก้างปลา, Mindmaps, วิดีโอสั้นแบบกราฟิก, ปากกาไฮไลท์หลากสี
+              </div>
+            </div>
+            <!-- A -->
+            <div class="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/10 space-y-2">
+              <div class="flex items-center space-x-2 text-amber-600 dark:text-amber-400">
+                <span class="text-2xl">👂</span>
+                <h4 class="font-bold">Auditory (A) - การเรียนรู้ผ่านการฟังและการพูด</h4>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-light leading-relaxed">
+                เรียนรู้ได้ดีที่สุดจากการบรรยาย การเล่าเรื่อง การพูดอธิบาย และการถามตอบประเด็นจำลอง จดจำระดับจังหวะและโทนน้ำเสียงได้ดี
+              </p>
+              <div class="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                <strong>เครื่องมือที่แนะนำ:</strong> พอดแคสต์ (Podcasts), การถกเถียงกลุ่ม, การซ้อมพูดอธิบายให้เป็ดเหลืองฟัง (Rubber Ducking)
+              </div>
+            </div>
+            <!-- R -->
+            <div class="p-5 rounded-2xl bg-purple-500/5 border border-purple-500/10 space-y-2">
+              <div class="flex items-center space-x-2 text-purple-600 dark:text-purple-400">
+                <span class="text-2xl">📖</span>
+                <h4 class="font-bold">Read/Write (R) - การเรียนรู้ผ่านการอ่านและเขียน</h4>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-light leading-relaxed">
+                ถูกโฉลกกับคำเขียน เอกสารคู่มือ รายงานที่เป็นระบบ ข้อสรุปแบบ Bullet points และการจดสมุดบันทึกย่อเพื่อจัดระเบียบความคิด
+              </p>
+              <div class="text-[11px] text-purple-600 dark:text-purple-400 font-medium">
+                <strong>เครื่องมือที่แนะนำ:</strong> เอกสารคู่มือ PDF, สรุปใจความสำคัญใน Post-it, วิกิวิชาการ, สมุดบันทึกย่อ
+              </div>
+            </div>
+            <!-- K -->
+            <div class="p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 space-y-2">
+              <div class="flex items-center space-x-2 text-emerald-600 dark:text-emerald-400">
+                <span class="text-2xl">🖐️</span>
+                <h4 class="font-bold">Kinesthetic (K) - การเรียนรู้ผ่านการลงมือทำ</h4>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-light leading-relaxed">
+                เรียนรู้ด้วยประสาทสัมผัส การเคลื่อนไหวร่างกาย การจำลองสถานการณ์จริง และประสบการณ์ตรงจากการลองผิดลองถูก
+              </p>
+              <div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                <strong>เครื่องมือที่แนะนำ:</strong> กิจกรรมจำลอง (Workshop), บล็อกต่อเลโก้, มินิโปรเจกต์เชิงปฏิบัติ, Pomodoro พักขยับตัว
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 2: Kolb -->
+      <div id="theoryKolbContent" class="space-y-6 hidden">
+        <div class="glass-card p-6 md:p-8 rounded-3xl border shadow-lg space-y-4">
+          <h3 class="text-lg font-bold text-brand-600 dark:text-brand-400">Kolb's Experiential Learning คืออะไร?</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
+            พัฒนาโดย <strong>David Kolb</strong> ในปี ค.ศ. 1984 เป็นกรอบทฤษฎีที่เน้นว่าการเรียนรู้เกิดจากการประมวลผลประสบการณ์ผ่านวงจร 4 ขั้นตอน (Learning Cycle) โดยแบ่งทักษะของคนเป็น 4 สไตล์การคิดตามตำแหน่งแกนของพฤติกรรม
+          </p>
+
+          <!-- Cycle diagram visual representation -->
+          <div class="p-5 rounded-2xl bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 space-y-4">
+            <h4 class="font-bold text-center text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wider">วงจรการเรียนรู้ 4 ขั้นตอน (The Learning Cycle)</h4>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-center">
+              <div class="p-3 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
+                <div class="text-xs font-bold text-amber-600 dark:text-amber-400">1. Concrete Experience (CE)</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">สัมผัสคลุกคลีและรู้สึกด้วยสัญชาตญาณหน้างานจริง</div>
+              </div>
+              <div class="p-3 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
+                <div class="text-xs font-bold text-pink-600 dark:text-pink-400">2. Reflective Observation (RO)</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">การสังเกตการณ์ สะท้อนคิด วิเคราะห์แง่มุมหลากหลาย</div>
+              </div>
+              <div class="p-3 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
+                <div class="text-xs font-bold text-blue-600 dark:text-blue-400">3. Abstract Conceptualization (AC)</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">สร้างแนวคิด ทฤษฎี จัดโครงสร้างระบบตรรกะเหตุและผล</div>
+              </div>
+              <div class="p-3 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
+                <div class="text-xs font-bold text-emerald-600 dark:text-emerald-400">4. Active Experimentation (AE)</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">ลงมือทดสอบทฤษฎี ประยุกต์แผนแก้ปัญหากล้าปรับเปลี่ยน</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Diverger -->
+            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1">
+              <span class="text-xs font-bold text-pink-500">Diverger (นักมองรอบด้าน) = CE + RO</span>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-light leading-relaxed">
+                ชอบสังเกต รวบรวมทางเลือก ใช้ความรู้สึกเห็นใจผู้อื่น และวิเคราะห์จากแง่มุมที่กว้างไกลเพื่อนำเสนอแนวคิดใหม่ๆ
+              </p>
+            </div>
+            <!-- Assimilator -->
+            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1">
+              <span class="text-xs font-bold text-blue-500">Assimilator (นักวิเคราะห์ทฤษฎี) = AC + RO</span>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-light leading-relaxed">
+                เน้นเหตุผลเชิงระบบ ทฤษฎีที่มั่นคง และการจัดระเบียบโครงสร้างเนื้อหา สนใจความตรรกะในเอกสารมากกว่าตัวบุคคล
+              </p>
+            </div>
+            <!-- Converger -->
+            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1">
+              <span class="text-xs font-bold text-emerald-500">Converger (นักประยุกต์และแก้ปัญหา) = AC + AE</span>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-light leading-relaxed">
+                นำความรู้ในกระดาษมาแก้ปัญหาเฉพาะทาง ปฏิบัติการด้วยเหตุและผลเชิงเทคนิค และตัดสินใจเลือกทางออกที่ดีที่สุดทางเดียว
+              </p>
+            </div>
+            <!-- Accommodator -->
+            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1">
+              <span class="text-xs font-bold text-amber-500">Accommodator (นักลุยปรับตัว) = CE + AE</span>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-light leading-relaxed">
+                ลุยปฏิบัติหน้างานหน้าสุดตามสัญชาตญาณ เรียนรู้สดๆ จากประสบการณ์หน้างาน พร้อมเปลี่ยนวิธีการแก้ปัญหาทันควันเมื่อสิ่งรอบตัวเปลี่ยน
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 3: References -->
+      <div id="theoryReferencesContent" class="space-y-6 hidden">
+        <div class="glass-card p-6 md:p-8 rounded-3xl border shadow-lg space-y-6">
+          <div class="space-y-2">
+            <h3 class="text-lg font-bold text-brand-600 dark:text-brand-400">📚 อ้างอิงทางวิชาการ (Academic References)</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
+              แบบทดสอบและระบบวิเคราะห์ผลลัพธ์นี้ได้รับการออกแบบโดยอ้างอิงจากหลักการและทฤษฎีทางจิตวิทยาการเรียนรู้ที่เป็นที่ยอมรับอย่างกว้างขวางในระดับสากล:
+            </p>
+          </div>
+
+          <div class="space-y-4 pt-2">
+            <!-- VARK Reference -->
+            <div class="p-5 rounded-2xl bg-brand-50/50 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-900/20 space-y-2.5">
+              <h4 class="font-bold text-slate-900 dark:text-slate-100 flex items-center space-x-2 text-sm">
+                <span>🎨</span>
+                <span>VARK Model (Visual, Auditory, Read/Write, Kinesthetic)</span>
+              </h4>
+              <ul class="text-xs text-slate-600 dark:text-slate-400 font-light list-disc pl-5 space-y-2 leading-relaxed">
+                <li>Fleming, N. D., & Mills, C. (1992). <strong>Not Another Inventory, Rather a Catalyst for Reflection.</strong> <em>To Improve the Academy</em>, 11(1), 137-155.</li>
+                <li>Fleming, N. D. (2001). <strong>Teaching and learning styles: VARK strategies.</strong> Christchurch, New Zealand: N.D. Fleming.</li>
+                <li>Fleming, N. D., & Baume, D. (2006). <strong>Learning Styles Again: VARKing Up the Right Tree.</strong> <em>Educational Developments</em>, 7.4, 4-7.</li>
+              </ul>
+            </div>
+
+            <!-- Kolb Reference -->
+            <div class="p-5 rounded-2xl bg-purple-50/50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/20 space-y-2.5">
+              <h4 class="font-bold text-slate-900 dark:text-slate-100 flex items-center space-x-2 text-sm">
+                <span>🔄</span>
+                <span>Kolb's Experiential Learning Theory (ELT)</span>
+              </h4>
+              <ul class="text-xs text-slate-600 dark:text-slate-400 font-light list-disc pl-5 space-y-2 leading-relaxed">
+                <li>Kolb, D. A. (1984). <strong>Experiential learning: Experience as the source of learning and development.</strong> Englewood Cliffs, NJ: Prentice-Hall.</li>
+                <li>Kolb, A. Y., & Kolb, D. A. (2005). <strong>Learning styles and learning spaces: Enhancing experiential learning in higher education.</strong> <em>Academy of Management Learning & Education</em>, 4(2), 193-212.</li>
+                <li>Kolb, D. A. (2014). <strong>Experiential learning: Experience as the source of learning and development (2nd Edition).</strong> FT press.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button to start quiz directly -->
+      <div class="flex justify-center pt-2">
+        <button onclick="startQuiz()" class="px-8 py-3.5 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-semibold rounded-xl transition duration-150 flex items-center space-x-2 shadow-md">
+          <span>เข้าใจแล้ว • เริ่มทำแบบทดสอบเลย</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. QUIZ SECTION -->
+    <div id="quizScreen" class="app-screen screen-hidden w-full max-w-3xl mx-auto py-6">
+      
+      <!-- Progress and navigation header -->
+      <div class="flex items-center justify-between mb-6">
+        <button onclick="prevQuestion()" id="btnPrev" class="px-4 py-2 text-sm rounded-lg border border-slate-300/30 dark:border-slate-800/50 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition duration-150 flex items-center space-x-1.5 focus:outline-none">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          <span>ย้อนกลับ</span>
+        </button>
+        
+        <div class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+          คำถามข้อที่ <span id="currentQuestionNum" class="text-brand-600 dark:text-brand-400">1</span> จาก <span id="totalQuestionsNum">9</span>
+        </div>
+        
+        <div class="w-24 text-right text-xs font-mono text-slate-400" id="progressPercent">0%</div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="w-full bg-slate-200 dark:bg-slate-800 h-2.5 rounded-full mb-8 overflow-hidden">
+        <div id="progressBar" class="bg-gradient-to-r from-brand-500 to-purple-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+
+      <!-- Question and options card container -->
+      <div class="relative overflow-hidden min-h-[420px]">
+        <div id="questionCard" class="question-slide glass-card p-6 md:p-8 rounded-3xl shadow-xl border relative">
+          
+          <!-- Scenario label -->
+          <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 mb-4 uppercase tracking-wider">
+            สถานการณ์จำลอง
+          </div>
+          
+          <!-- Question text -->
+          <h2 id="questionText" class="text-lg md:text-xl font-semibold leading-relaxed text-slate-900 dark:text-slate-100 mb-6">
+            คำถามจำลองกำลังโหลด...
+          </h2>
+          
+          <!-- Options list -->
+          <div id="optionsContainer" class="space-y-4">
+            <!-- Dynamic list of options generated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. PROCESSING SCREEN -->
+    <div id="processingScreen" class="app-screen screen-hidden w-full max-w-md mx-auto text-center py-16">
+      <div class="space-y-8">
+        <!-- Floating Brain SVG -->
+        <div class="relative w-36 h-36 mx-auto">
+          <div class="absolute inset-0 bg-brand-500/20 rounded-full blur-2xl animate-radar-pulse"></div>
+          <svg class="w-full h-full text-brand-500 dark:text-brand-400 relative z-10 animate-float" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 9h-1m14.071-7.071l-.707.707M6.343 17.657l-.707.707m2.828-9.9a5 5 0 117.071 7.071 5 5 0 01-7.071-7.071z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M12 8v4l3 3"/>
+          </svg>
+        </div>
+        
+        <div class="space-y-3">
+          <h3 class="text-xl font-bold">กำลังประมวลผลระบบความคิด...</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto">วิเคราะห์รูปแบบคลื่นประสาทสัมผัส VARK และจับคู่พฤติกรรมการทดลองเรียนรู้ตามทฤษฎี Kolb</p>
+        </div>
+
+        <!-- Simulated loading status texts -->
+        <div class="h-6 overflow-hidden">
+          <p id="loadingStatusText" class="text-xs font-mono text-brand-600 dark:text-brand-400 uppercase tracking-widest">
+            INITIALIZING NEURAL MAPPING...
+          </p>
+        </div>
+
+        <!-- Micro progress bar -->
+        <div class="w-48 bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full mx-auto overflow-hidden">
+          <div class="bg-brand-500 h-full rounded-full animate-[loading-bar_2s_ease-in-out_infinite]" style="width: 30%; animation: loading-move 2s infinite;"></div>
+          <style>
+            @keyframes loading-move {
+              0% { margin-left: -30%; width: 30%; }
+              50% { margin-left: 100%; width: 10%; }
+              100% { margin-left: -30%; width: 30%; }
+            }
+          </style>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. RESULT SCREEN -->
+    <div id="resultScreen" class="app-screen screen-hidden w-full max-w-5xl mx-auto py-6 space-y-8">
+      
+      <!-- Result Header Card -->
+      <div class="glass-card p-6 md:p-8 rounded-3xl border shadow-xl relative overflow-hidden print-card">
+        <!-- Absolute badge -->
+        <div class="absolute top-0 right-0 bg-brand-600 text-white px-6 py-2 rounded-bl-2xl font-bold text-xs uppercase tracking-widest no-print">
+          Official Report
+        </div>
+        
+        <div class="text-center md:text-left space-y-4">
+          <div class="text-slate-500 dark:text-slate-400 text-sm font-semibold uppercase tracking-wider">
+            รายงานการวิเคราะห์ระดับบุคคล สำหรับคุณ
+          </div>
+          <h2 id="resultUserTitle" class="text-2xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">
+            คุณ <span id="displayUserName" class="text-brand-600 dark:text-brand-400">ผู้ใช้งาน</span>
+          </h2>
+          
+          <hr class="border-slate-200 dark:border-slate-800/80 my-4">
+
+          <!-- Core summary result grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <!-- VARK Dominant Info -->
+            <div class="p-5 rounded-2xl bg-brand-50/50 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-900/30">
+              <span class="text-xs font-bold text-brand-600 dark:text-brand-400 uppercase tracking-widest">Dominant Sensing Channel (VARK)</span>
+              <h3 id="varkDominantTitle" class="text-xl font-bold text-slate-900 dark:text-slate-100 mt-1 flex items-center">
+                <span id="varkEmoji" class="mr-2">👁️</span> <span id="varkStyleName">Visual Learner</span>
+              </h3>
+              <p id="varkDominantDesc" class="text-sm text-slate-600 dark:text-slate-400 mt-2 font-light leading-relaxed">
+                โหลดคำอธิบาย...
+              </p>
+            </div>
+            
+            <!-- Kolb Dominant Info -->
+            <div class="p-5 rounded-2xl bg-purple-50/50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/30">
+              <span class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest">Cognitive Cycle Style (Kolb)</span>
+              <h3 id="kolbDominantTitle" class="text-xl font-bold text-slate-900 dark:text-slate-100 mt-1 flex items-center">
+                <span id="kolbEmoji" class="mr-2">🔄</span> <span id="kolbStyleName">Diverger</span>
+              </h3>
+              <p id="kolbDominantDesc" class="text-sm text-slate-600 dark:text-slate-400 mt-2 font-light leading-relaxed">
+                โหลดคำอธิบาย...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Graphical Data Charts Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- Left: VARK Radar Chart Card -->
+        <div class="glass-card p-6 rounded-3xl border shadow-lg print-card flex flex-col items-center">
+          <div class="w-full text-left mb-4">
+            <h3 class="font-bold text-slate-900 dark:text-slate-100">ช่องรับสารหลัก (VARK Profile)</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">วิเคราะห์สัดส่วนความสามารถการเปิดรับข้อมูลแต่ละด้าน</p>
+          </div>
+          <div id="varkChartContainer" class="w-full flex justify-center py-4">
+            <!-- Dynamic SVG Radar Chart inserted here -->
+          </div>
+          <div class="grid grid-cols-4 gap-2 w-full text-center text-xs mt-2 border-t pt-4 border-slate-200/50 dark:border-slate-800/50">
+            <div>
+              <div class="font-bold text-slate-900 dark:text-slate-100 font-mono" id="scoreValV">0</div>
+              <div class="text-[10px] text-slate-500 dark:text-slate-400">Visual (V)</div>
+            </div>
+            <div>
+              <div class="font-bold text-slate-900 dark:text-slate-100 font-mono" id="scoreValA">0</div>
+              <div class="text-[10px] text-slate-500 dark:text-slate-400">Auditory (A)</div>
+            </div>
+            <div>
+              <div class="font-bold text-slate-900 dark:text-slate-100 font-mono" id="scoreValR">0</div>
+              <div class="text-[10px] text-slate-500 dark:text-slate-400">Read/Write (R)</div>
+            </div>
+            <div>
+              <div class="font-bold text-slate-900 dark:text-slate-100 font-mono" id="scoreValK">0</div>
+              <div class="text-[10px] text-slate-500 dark:text-slate-400">Kinesthetic (K)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Kolb 2D Grid Card -->
+        <div class="glass-card p-6 rounded-3xl border shadow-lg print-card flex flex-col items-center">
+          <div class="w-full text-left mb-4">
+            <h3 class="font-bold text-slate-900 dark:text-slate-100">มิติการประมวลความคิด (Kolb Coordinates)</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">ตำแหน่งของคุณบนแกนคิด-ทำ (AC/CE) และทำ-ดูสะท้อนคิด (AE/RO)</p>
+          </div>
+          <div id="kolbChartContainer" class="w-full flex justify-center py-4">
+            <!-- Dynamic SVG Scatter Grid inserted here -->
+          </div>
+          <div class="grid grid-cols-4 gap-2 w-full text-center text-xs mt-2 border-t pt-4 border-slate-200/50 dark:border-slate-800/50">
+            <div>
+              <div class="font-bold text-slate-900 dark:text-slate-100 font-mono" id="scoreValCE">0</div>
+              <div class="text-[10px] text-slate-500 dark:text-slate-400">Concrete Feeling (CE)</div>
+            </div>
+            <div>
+              <div class="font-bold text-slate-900 dark:text-slate-100 font-mono" id="scoreValRO">0</div>
+              <div class="text-[10px] text-slate-500 dark:text-slate-400">Reflective Watching (RO)</div>
+            </div>
+            <div>
+              <div class="font-bold text-slate-900 dark:text-slate-100 font-mono" id="scoreValAC">0</div>
+              <div class="text-[10px] text-slate-500 dark:text-slate-400">Abstract Thinking (AC)</div>
+            </div>
+            <div>
+              <div class="font-bold text-slate-900 dark:text-slate-100 font-mono" id="scoreValAE">0</div>
+              <div class="text-[10px] text-slate-500 dark:text-slate-400">Active Doing (AE)</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Detailed Psychological Profiles -->
+      <div class="glass-card p-6 md:p-8 rounded-3xl border shadow-lg print-card space-y-6">
+        <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 border-b pb-3 border-slate-200 dark:border-slate-800">
+          🔍 ผลการประเมินเจาะลึกแบบบูรณาการ
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- 1. Learning Style Details -->
+          <div class="space-y-2">
+            <div class="flex items-center space-x-2 text-brand-600 dark:text-brand-400">
+              <span class="text-xl">🎨</span>
+              <h4 class="font-bold">สไตล์การเรียนรู้ (Learning Style)</h4>
+            </div>
+            <p id="detailLearningStyle" class="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
+              สแกนสไตล์การเรียนรู้การรับข้อมูล...
+            </p>
+          </div>
+
+          <!-- 2. Thinking Style Details -->
+          <div class="space-y-2">
+            <div class="flex items-center space-x-2 text-purple-600 dark:text-purple-400">
+              <span class="text-xl">⚙️</span>
+              <h4 class="font-bold">กระบวนการคิด (Thinking Style)</h4>
+            </div>
+            <p id="detailThinkingStyle" class="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
+              สแกนกระบวนการคิดวิเคราะห์...
+            </p>
+          </div>
+
+          <!-- 3. Communication Style Details -->
+          <div class="space-y-2">
+            <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400">
+              <span class="text-xl">💬</span>
+              <h4 class="font-bold">สไตล์การสื่อสาร (Communication Style)</h4>
+            </div>
+            <p id="detailCommunicationStyle" class="text-sm text-slate-600 dark:text-slate-400 font-light leading-relaxed">
+              สแกนการประสานสื่อสาร...
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actionable Advice & Development Plan -->
+      <div class="glass-card p-6 md:p-8 rounded-3xl border shadow-lg print-card border-brand-500/20 dark:border-brand-400/10 space-y-6">
+        <h3 class="text-xl font-bold bg-gradient-to-r from-brand-600 to-purple-600 dark:from-brand-400 dark:to-purple-400 bg-clip-text text-transparent border-b pb-3 border-slate-200 dark:border-slate-800">
+          💡 แผนการพัฒนาตนเองรายบุคคล (Actionable Advice)
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Study / Work Techniques -->
+          <div class="space-y-4">
+            <h4 class="font-bold text-slate-800 dark:text-slate-200 flex items-center space-x-2">
+              <span class="p-1.5 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400">🛠️</span>
+              <span>เทคนิคเรียน / ทำงานให้มีประสิทธิภาพสูงสุด</span>
+            </h4>
+            <ul id="adviceTechniquesList" class="space-y-2.5 text-sm text-slate-600 dark:text-slate-400 font-light list-none pl-0">
+              <!-- Dynamically populated checklist -->
+            </ul>
+          </div>
+
+          <!-- Skill Development & Warnings -->
+          <div class="space-y-4">
+            <h4 class="font-bold text-slate-800 dark:text-slate-200 flex items-center space-x-2">
+              <span class="p-1.5 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400">🚀</span>
+              <span>แนวทางพัฒนาทักษะ (Skill Development) & จุดอ่อนพึงระวัง</span>
+            </h4>
+            <ul id="adviceSkillsList" class="space-y-2.5 text-sm text-slate-600 dark:text-slate-400 font-light list-none pl-0">
+              <!-- Dynamically populated checklist -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Disclaimer Alert (Results) -->
+      <div class="text-center max-w-2xl mx-auto py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/30 dark:bg-slate-900/20 text-slate-400 dark:text-slate-500 text-[11px] leading-relaxed font-light print:border-none print:bg-transparent">
+        ⚠️ <strong>คำชี้แจง:</strong> รายงานฉบับนี้วิเคราะห์ผลลัพธ์จากข้อมูลสถานการณ์สมมติเบื้องต้นเพื่อใช้เป็นแนวทางพัฒนาการศึกษา ผลลัพธ์อาจมีข้อผิดพลาดได้ โปรดใช้วิจารณญาณในการประเมินความชอบและความถนัดที่แท้จริงของตนเอง
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 no-print">
+        <button onclick="resetQuiz(false)" class="w-full sm:w-auto px-6 py-3 bg-slate-200/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium rounded-xl transition duration-150 flex items-center justify-center space-x-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.228 9H18.01"/>
+          </svg>
+          <span>ทำแบบทดสอบใหม่</span>
+        </button>
+
+        <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <!-- Copy results link button -->
+          <button onclick="copyResults()" class="w-full sm:w-auto px-6 py-3 bg-slate-200/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium rounded-xl transition duration-150 flex items-center justify-center space-x-2">
+            <svg id="copyIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+            </svg>
+            <span id="copyBtnText">คัดลอกสรุปผลลัพธ์</span>
+          </button>
+
+          <!-- Print button -->
+          <button onclick="window.print()" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-medium rounded-xl transition duration-150 flex items-center justify-center space-x-2 shadow-md">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            <span>พิมพ์รายงาน / บันทึก PDF</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Feedback / Report Modal -->
+  <div id="feedbackModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden transition-all duration-300">
+    <div class="glass-card max-w-md w-full p-6 rounded-3xl shadow-2xl border border-brand-500/20 relative">
+      <button onclick="closeFeedbackModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      
+      <div class="space-y-4">
+        <div class="flex items-center space-x-3 text-brand-600 dark:text-brand-400">
+          <span class="text-2xl">📢</span>
+          <h3 class="text-lg font-bold">ส่งสัญญาณข้อเสนอแนะ / แจ้งปัญหา</h3>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 font-light leading-relaxed">
+          หากคุณพบข้อผิดพลาดหรือมีข้อเสนอแนะในการปรับปรุงแบบทดสอบ สามารถส่งรายละเอียดด่วนได้ที่นี่ ระบบจะส่งข้อมูลตรงไปยังผู้พัฒนา (คุณ Dell Napatsakorn Klinfueang)
+        </p>
+        
+        <div>
+          <label for="feedbackEmail" class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">อีเมลของคุณ (สำหรับติดต่อกลับ - ไม่บังคับ):</label>
+          <input type="email" id="feedbackEmail" placeholder="example@email.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-800 dark:text-slate-100">
+        </div>
+        
+        <div>
+          <label for="feedbackMsg" class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">บันทึกข้อผิดพลาด / ข้อความ:</label>
+          <textarea id="feedbackMsg" rows="4" placeholder="พิมพ์อธิบายปัญหาหรือข้อเสนอแนะที่พบ..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-800 dark:text-slate-100 resize-none"></textarea>
+        </div>
+        
+        <button onclick="submitFeedback()" class="w-full py-3 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg transition duration-150 flex items-center justify-center space-x-2">
+          <span>ส่งสัญญาณหาผู้พัฒนา</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="py-6 border-t border-slate-200/50 dark:border-slate-900/50 text-center text-xs text-slate-400 no-print">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+      <span>CogniStyle App © 2026 • พัฒนาโดย Dell Napatsakorn Klinfueang • ออกแบบตามหลักวิทยาการเรียนรู้ VARK และทฤษฎีวงจร Kolb</span>
+      <span class="hidden sm:inline">•</span>
+      <button onclick="openFeedbackModal()" class="text-brand-600 dark:text-brand-400 hover:text-brand-500 underline hover:no-underline transition duration-150 flex items-center gap-1 font-medium">
+        <span>📢 ส่งสัญญาณแจ้งปัญหา</span>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Application Logic (JavaScript) -->
+  <script>
+    // 1. DATABASE OF SCENARIO QUESTIONS
+    const quizQuestions = [
+      {
+        id: 1,
+        scenario: "เมื่อคุณซื้อเฟอร์นิเจอร์ชิ้นใหม่มา (เช่น ชั้นวางของอัจฉริยะแบบประกอบเอง) สิ่งแรกที่คุณจะเลือกทำเพื่อช่วยในการประกอบคือ...",
+        options: [
+          {
+            letter: "ก",
+            text: "เปิดดูคลิปวิดีโออนิเมชัน 3D แนะนำวิธีประกอบใน YouTube เพื่อดูภาพตัวอย่างการวางชิ้นส่วนสีสันต่างๆ ก่อนลงมือประกอบจริง",
+            vark: "V",
+            kolb: "RO",
+            desc: "ใช้การดูภาพและสังเกตเพื่อทำความเข้าใจ"
+          },
+          {
+            letter: "ข",
+            text: "โทรศัพท์ถามขั้นตอนประกอบคร่าวๆ จากเพื่อนร่วมงาน หรือเปิดฟังคลิปรีวิวบรรยายการประกอบเพื่อให้จำสเต็ปได้ง่ายขึ้น",
+            vark: "A",
+            kolb: "CE",
+            desc: "ใช้การฟังเสียงและแบ่งปันความรู้สึกแบบมีปฏิสัมพันธ์"
+          },
+          {
+            letter: "ค",
+            text: "กางคู่มือกระดาษที่มีแต่ตัวหนังสือคำอธิบายยาวๆ อ่านขั้นตอนและข้อควรระวังให้ครบถ้วนก่อน พร้อมขีดเช็คตามรายการชิ้นส่วนทีละข้อ",
+            vark: "R",
+            kolb: "AC",
+            desc: "ใช้ตรรกะ ตัวอักษรคู่มือ และคิดวิเคราะห์เชิงระบบ"
+          },
+          {
+            letter: "ง",
+            text: "แกะพลาสติกและนำชิ้นส่วนทั้งหมดออกมากองรวมกัน แล้วทดลองลุยเสียบสลักไม้ต่อชิ้นส่วนทันที ลองผิดลองถูกแล้วค่อยย้อนมาแก้หน้างาน",
+            vark: "K",
+            kolb: "AE",
+            desc: "ใช้สัมผัส ลงมือทำ และลุยปรับตัวจากการลองผิดลองถูก"
+          }
+        ]
+      },
+      {
+        id: 2,
+        scenario: "หากคุณต้องเตรียมตัวนำเสนองานสำคัญในที่ประชุมใหญ่วันพรุ่งนี้ คุณเลือกใช้วิธีใดในการฝึกซ้อม?",
+        options: [
+          {
+            letter: "ก",
+            text: "จัดทำแผนภูมิการไหลของเนื้อหา (Flowchart) หรือสร้างสไลด์นำเสนอที่ใช้การแบ่งรหัสสีและไอคอนสัญลักษณ์ เพื่อกวาดสายตาจดจำโครงสร้างสเต็ป",
+            vark: "V",
+            kolb: "RO",
+            desc: "เน้นจำตำแหน่งภาพกราฟฟิกและการเชื่อมโยงด้วยตาเปล่า"
+          },
+          {
+            letter: "ข",
+            text: "ซ้อมพูดอธิบายเสียงดังๆ ในห้อง หรืออัดเสียงพูดของตัวเองแล้วเปิดฟังซ้ำเพื่อตรวจสอบโทนเสียง จังหวะ และการเว้นช่วงการเล่าเรื่อง",
+            vark: "A",
+            kolb: "CE",
+            desc: "เน้นเสียงพูด ฟังการออกเสียง และการปรึกษาสัมผัสพลังงานบุคคล"
+          },
+          {
+            letter: "ค",
+            text: "เขียนสคริปต์คำพูดร่างลงบนกระดาษแบบละเอียดคำต่อคำ จัดย่อหน้าข้อมูลอย่างเป็นระเบียบ และอ่านทบทวนรายงานสถิติตัวเลขเชิงลึก",
+            vark: "R",
+            kolb: "AC",
+            desc: "เน้นวิเคราะห์คำเขียน การเรียงตรรกะประโยคที่เป็นทางการ"
+          },
+          {
+            letter: "ง",
+            text: "ซ้อมเดินนำเสนอไปมารอบห้อง ใช้ท่าทางมือประกอบการอธิบาย และกดทดลองใช้อุปกรณ์จริงเพื่อจำลองความรู้สึกและน้ำหนักการทำงานจริง",
+            vark: "K",
+            kolb: "AE",
+            desc: "ใช้การขยับร่างกาย จำลองการเคลื่อนไหวเพื่อซ้อมเสมือนจริง"
+          }
+        ]
+      },
+      {
+        id: 3,
+        scenario: "เมื่อคุณต้องการหัดใช้โปรแกรมคอมพิวเตอร์หรือแอปพลิเคชันมือถือตัวใหม่ที่มีฟังก์ชันการทำงานค่อนข้างซับซ้อน คุณทำอย่างไร?",
+        options: [
+          {
+            letter: "ก",
+            text: "เปิดดูคลิปวิดีโอสอนใช้งานสั้นๆ (Tutorial) หรือดูรูปภาพประกอบจับภาพหน้าจอ (Screenshots) ที่มีลูกศรชี้บอกการทำงานของแต่ละเมนู",
+            vark: "V",
+            kolb: "RO",
+            desc: "จำโครงสร้างและการวางเลย์เอาต์หน้าต่างเครื่องมือจากวิดีโอ"
+          },
+          {
+            letter: "ข",
+            text: "ชวนเพื่อนหรือเพื่อนร่วมงานที่ชำนาญมานั่งคุยสอนวิธีการใช้ หรือเข้าไปพิมพ์ถามข้อสงสัยในกลุ่มฟอรัมเพื่อแลกเปลี่ยนเทคนิคกัน",
+            vark: "A",
+            kolb: "CE",
+            desc: "จับอารมณ์ คุยเสียงเพื่อเรียนรู้เคล็ดลับเฉพาะจากคำพูด"
+          },
+          {
+            letter: "ค",
+            text: "เปิดอ่านเอกสารคู่มือสอนใช้งานออนไลน์ (Documentation) หรือดาวน์โหลดไฟล์ PDF ข้อมูลความสัมพันธ์ของคำสั่งอย่างเป็นระบบ",
+            vark: "R",
+            kolb: "AC",
+            desc: "ศึกษาเชิงลึกจากบทความวิชาการเชิงคู่มือและข้อกำหนดโครงสร้าง"
+          },
+          {
+            letter: "ง",
+            text: "เปิดแอปพลิเคชันขึ้นมาแล้วทดลองเอานิ้วจิ้มกดปุ่มเล่นดูทุกปุ่มทันที เรียนรู้วิธีการใช้ผ่านการทดลองทำและสังเกตผลลัพธ์จริง",
+            vark: "K",
+            kolb: "AE",
+            desc: "เน้นพฤติกรรมกล้าลองเสี่ยง ประยุกต์วิเคราะห์ผลตอบรับแบบเรียลไทม์"
+          }
+        ]
+      },
+      {
+        id: 4,
+        scenario: "คุณกำลังวางแผนเดินทางไปท่องเที่ยวในเมืองหลวงของต่างประเทศที่คุณไม่เคยไปมาก่อนเลย คุณวางแผนทริปนี้อย่างไร?",
+        options: [
+          {
+            letter: "ก",
+            text: "เปิด Google Maps ปักหมุดสีแยกประเภทสถานที่ (โรงแรม/ร้านอาหาร/จุดเที่ยว) และคัดภาพสวยๆ จาก Instagram เพื่อวางแผนจุดถ่ายรูป",
+            vark: "V",
+            kolb: "RO",
+            desc: "จดจำตำแหน่งในเชิงภูมิศาสตร์และความงามผ่านภาพสี"
+          },
+          {
+            letter: "ข",
+            text: "นั่งฟังพอดแคสต์ (Podcasts) รีวิวการท่องเที่ยวเมืองนี้ หรือทักแชทไปสอบถามขอฟังประสบการณ์ตรงจากคนรู้จักที่เคยไปมาแล้ว",
+            vark: "A",
+            kolb: "CE",
+            desc: "จำข้อมูลจากเรื่องเล่า บรรยากาศทางความรู้สึก และเสียงพูด"
+          },
+          {
+            letter: "ค",
+            text: "อ่านบล็อกรีวิวเชิงลึกที่มีตารางแจกแจงค่าใช้จ่าย ค้นหาราคาตั๋วรถไฟ และเส้นทางรถประจำทางพร้อมจดเวลาเปิด-ปิดอย่างละเอียด",
+            vark: "R",
+            kolb: "AC",
+            desc: "มีระเบียบการเขียนแผน และตรวจสอบเงื่อนไขความถูกต้องผ่านการค้นคว้า"
+          },
+          {
+            letter: "ง",
+            text: "จองเพียงแค่ตั๋วและโรงแรมหลัก แล้วไปเดินเท้าเดินทัวร์ลุยสำรวจจริงตามซอกซอย ลองชิมอาหารสตรีทฟู้ด และปรับทริปตามความรู้สึกหน้างาน",
+            vark: "K",
+            kolb: "AE",
+            desc: "เปิดรับสัมผัส ความตื่นเต้น และการทดลองใช้ชีวิตสดๆ ตามสัญชาตญาณ"
+          }
+        ]
+      },
+      {
+        id: 5,
+        scenario: "เมื่อระบบงาน โครงการ หรือกิจกรรมที่คุณเป็นผู้รับผิดชอบเกิดปัญหาขัดข้องกะทันหัน คุณหาสาเหตุอย่างไร?",
+        options: [
+          {
+            letter: "ก",
+            text: "วาดแผนภูมิความสัมพันธ์ (Flowchart) หรือเขียนไดอะแกรมแผนภาพก้างปลาลงในกระดาษ เพื่อให้เห็นภาพรวมของจุดเชื่อมโยงปัญหามุมกว้าง",
+            vark: "V",
+            kolb: "RO",
+            desc: "ใช้การมองภาพเหตุและผลเชิงพิกัด"
+          },
+          {
+            letter: "ข",
+            text: "โทรศัพท์ชวนทีมประชุมด่วน เล่าอาการของปัญหาให้ทุกคนฟังเพื่อออกเสียงระดมความคิดเห็น และฟังเสียงสะท้อนคำแนะนำการแก้ไข",
+            vark: "A",
+            kolb: "CE",
+            desc: "เรียนรู้พฤติกรรมผ่านปฏิสัมพันธ์ มนุษยสัมพันธ์ และความต้องการส่วนร่วม"
+          },
+          {
+            letter: "ค",
+            text: "เปิดอ่านรายงานบันทึกประวัติการทำงาน (Logs) กางตารางเปรียบเทียบค่าความผิดปกติ และค้นหาวิธีแก้จากคู่มือมาตรฐานอ้างอิง",
+            vark: "R",
+            kolb: "AC",
+            desc: "ใช้การตรวจสอบนิยาม แนวคิดทฤษฎี และเอกสารวิเคราะห์อย่างละเอียด"
+          },
+          {
+            letter: "ง",
+            text: "ลงมือถอดปลั๊ก รันโปรแกรมใหม่ หรือปรับเปลี่ยนตัวแปรในระบบที่ละส่วนทันทีเพื่อทดสอบผลลัพธ์แบบเรียลไทม์ว่ามีจุดใดตอบสนองดีขึ้น",
+            vark: "K",
+            kolb: "AE",
+            desc: "เรียนรู้ผ่านการทดลองหน้างานจริง ปรับการทำงานโดยไม่ลังเล"
+          }
+        ]
+      },
+      {
+        id: 6,
+        scenario: "หากคุณต้องการเริ่มต้นฝึกเรียนรู้งานอดิเรกใหม่ๆ (เช่น การจัดตกแต่งจานอาหารระดับพรีเมียม หรือการฝึกเล่นกีตาร์)",
+        options: [
+          {
+            letter: "ก",
+            text: "เปิดคลิปวิดีโอสาธิตการทำของเชฟหรือผู้เชี่ยวชาญ คอยสังเกตเทคนิคการเคลื่อนไหว การจัดวางองค์ประกอบจาน และสีสันอย่างใกล้ชิด",
+            vark: "V",
+            kolb: "RO",
+            desc: "สร้างภาพจินตนาการทางตา สังเกตทิศทางและมิติความตื้นลึก"
+          },
+          {
+            letter: "ข",
+            text: "เปิดไฟล์เสียงอภิปราย ฟังคำอธิบายเรื่องจังหวะ โทนเสียง และเปรียบเทียบเสียงที่เล่นออกมาเพื่อประเมินความถูกต้องของทำนองดนตรี",
+            vark: "A",
+            kolb: "CE",
+            desc: "ใช้สุนทรียภาพทางเสียง การสื่อสารในหัวใจ และการแนะแนวด้วยวาจา"
+          },
+          {
+            letter: "ค",
+            text: "ซื้อตำราอาหาร หรือกางแผ่นโน้ตดนตรีมาตรฐานมาอ่านเพื่อวิเคราะห์ความหมายของเครื่องหมายดนตรีและทฤษฎีระบบอาหารก่อนลงมือซ้อม",
+            vark: "R",
+            kolb: "AC",
+            desc: "เคารพคู่มือเขียน โน้ตเพลง ลำดับขั้นอันสมบูรณ์แบบเชิงวิทยาศาสตร์"
+          },
+          {
+            letter: "ง",
+            text: "หยิบวัตถุดิบครัวมาปรุง หรือลองดีดกีตาร์ทันที ค่อยใช้ความรู้สึกสัมผัสปลายนิ้วและชิมรสชาติเพื่อปรับเปลี่ยนความเหมาะสมสดๆ หน้างาน",
+            vark: "K",
+            kolb: "AE",
+            desc: "จำลองประสบการณ์จริงจากการสัมผัส คลุกคลี และการตอบสนองผ่านร่างกาย"
+          }
+        ]
+      },
+      {
+        id: 7,
+        scenario: "เมื่อเพื่อนสนิทชวนคุณไปเล่นบอร์ดเกมแนววางแผนกลยุทธ์เกมใหม่ที่คุณไม่เคยเล่นมาก่อนเลย สิ่งแรกที่คุณต้องการทำเพื่อเรียนรู้กฎกติกาการเล่นของเกมนี้คืออะไร?",
+        options: [
+          {
+            letter: "ก",
+            text: "เปิดดูคลิปวิดีโออนิเมชันสรุปวิธีเล่นด่วนย่อๆ หรือดูภาพการ์ตูนอินโฟกราฟิกเซ็ตอัพบอร์ดเพื่อดูสัญลักษณ์และการจัดวางอุปกรณ์",
+            vark: "V",
+            kolb: "RO",
+            desc: "ทำความเข้าใจกฎกติกาเบื้องต้นผ่านภาพเคลื่อนไหวและแผนผังสีสัน"
+          },
+          {
+            letter: "ข",
+            text: "ให้เพื่อนที่เป็นเจ้าของเกมนั่งเล่าอธิบายกติกาให้ฟัง และร่วมจับกลุ่มพูดคุยแลกเปลี่ยนแนวทางการเอาชนะกันในกลุ่มอย่างสนุกสนาน",
+            vark: "A",
+            kolb: "CE",
+            desc: "รับรู้กติกาผ่านการฟังคำอธิบาย การซักถามถกเถียง และสัมผัสความรู้สึกเป็นกลุ่ม"
+          },
+          {
+            letter: "ค",
+            text: "กางสมุดคู่มือกฎกติกาภาษาไทยฉบับเต็ม (Rulebook) อ่านรายละเอียดข้อจำกัดของการเดินและการนับคะแนนอย่างเป็นระบบทีละหน้าจนเข้าใจ",
+            vark: "R",
+            kolb: "AC",
+            desc: "ศึกษาคู่มือภาษาเขียน การแบ่งลำดับแต้ม และจัดวางความเข้าใจเชิงโครงสร้าง"
+          },
+          {
+            letter: "ง",
+            text: "ขอนำอุปกรณ์ออกมาวางบนโต๊ะ แจกการ์ดให้ทุกคน แล้วเริ่มทดลองเล่นรอบสาธิต (Mock Round) ทันทีเพื่อปรับทักษะความคุ้นเคยสดๆ หน้างาน",
+            vark: "K",
+            kolb: "AE",
+            desc: "ลุยเล่นจริงตาทดลอง เรียนรู้วิธีเดินการ์ดผ่านการลงมือสัมผัสและปรับตัวตามรอบ"
+          }
+        ]
+      },
+      {
+        id: 8,
+        scenario: "คุณกำลังพิจารณาจะซื้อสมาร์ทโฟนระดับเรือธงเครื่องใหม่ที่มีราคาสูง คุณใช้วิธีใดในการเปรียบเทียบข้อมูลก่อนการตัดสินใจซื้อ?",
+        options: [
+          {
+            letter: "ก",
+            text: "ดูคลิปวิดีโอรีวิวการทดสอบกล้อง แกะกล่องสินค้า หรือเปิดดูแกลเลอรีรูปภาพเปรียบเทียบโทนสีและขนาดมิติตัวเครื่อง",
+            vark: "V",
+            kolb: "RO",
+            desc: "สังเกตความคุ้มค่าและความเป็นไปได้ผ่านการเปรียบเทียบเชิงทัศน์"
+          },
+          {
+            letter: "ข",
+            text: "ฟังพอดแคสต์จัดอันดับความรู้สึกของบล็อกเกอร์ หรือโทรศัพท์ไปพูดคุยถามความเห็นจากเพื่อนสนิทที่ใช้รุ่นนั้นอยู่ก่อนแล้ว",
+            vark: "A",
+            kolb: "CE",
+            desc: "ใช้ข้อมูลคำพูด ประสบการณ์จริง และเสียงสะท้อนความรู้สึกประทับใจ"
+          },
+          {
+            letter: "ค",
+            text: "กางตารางสเปกทางเทคนิคเพื่อวิเคราะห์ประสิทธิภาพหน่วยประมวลผล เปรียบเทียบตัวเลข Benchmark และราคาแต่ละโปรโมชัน",
+            vark: "R",
+            kolb: "AC",
+            desc: "ประเมินโดยใช้หลักตรรกะ เหตุผลเชิงตัวเลข และข้อสรุปเอกสารทางการ"
+          },
+          {
+            letter: "ง",
+            text: "เดินทางไปที่ศูนย์บริการหรือร้านค้า เพื่อหยิบจับ ทดลองกวาดหน้าจอ เล่นแอปพลิเคชัน และทดสอบถือในมือจริงเพื่อเช็คน้ำหนัก",
+            vark: "K",
+            kolb: "AE",
+            desc: "ใช้สัมผัสจริง ตรวจสอบการใช้งานแบบเรียลไทม์ และตัดสินใจตามความรู้สึกหน้างาน"
+          }
+        ]
+      },
+      {
+        id: 9,
+        scenario: "คุณกำลังเข้าร่วมเวิร์กชอปสร้างสรรค์ผลงานหรือเรียนรู้ทักษะใหม่ (เช่น เวิร์กชอปการออกแบบกราฟิก หรือการเขียนโค้ดเริ่มต้น) คุณเรียนรู้ได้ดีที่สุดอย่างไร?",
+        options: [
+          {
+            letter: "ก",
+            text: "สังเกตหน้าจอของวิทยากรที่สาธิตขั้นตอนให้ดู หรือดูแผนภาพอินโฟกราฟิกแสดงโครงสร้างการจัดวางองค์ประกอบต่างๆ",
+            vark: "V",
+            kolb: "RO",
+            desc: "เรียนรู้โดยการจำตำแหน่ง โครงร่างสี และความสัมพันธ์เชิงรูปภาพ"
+          },
+          {
+            letter: "ข",
+            text: "ฟังวิทยากรอธิบายหลักการสดๆ และจับกลุ่มพูดคุยแลกเปลี่ยนปัญหาการทำงานกับเพื่อนๆ ร่วมชั้นที่นั่งโต๊ะข้างกัน",
+            vark: "A",
+            kolb: "CE",
+            desc: "รับรู้ผ่านการฟังคำอธิบาย การแลกเปลี่ยนด้วยวาจา และสัมผัสความรู้สึกกลุ่ม"
+          },
+          {
+            letter: "ค",
+            text: "อ่านเอกสารประกอบการบรรยาย (Handouts) ที่แจกให้ จดสูตร หรือโค้ดตัวอย่างลงสมุดโน้ตอย่างเป็นระเบียบตามลำดับ",
+            vark: "R",
+            kolb: "AC",
+            desc: "สร้างระบบการจดจำจากเอกสารอักษร ลำดับตรรกะ และวิเคราะห์แนวคิด"
+          },
+          {
+            letter: "ง",
+            text: "พิมพ์โค้ดตามจริงทันทีลงในเครื่อง หรือจัดองค์ประกอบภาพในซอฟต์แวร์ด้วยตนเอง เพื่อหาวิธีแก้ไขจุดผิดพลาดหน้างาน",
+            vark: "K",
+            kolb: "AE",
+            desc: "ทดลองทำ ปรับปรุงจุดบกพร่องตามจริงทันควัน และจำผ่านกล้ามเนื้อมือสัมผัส"
+          }
+        ]
+      }
+    ];
+
+    // 2. STATE MANAGEMENT VARIABLES
+    let currentQuestionIndex = 0;
+    let userAnswers = []; // Stores the selected option indexes
+    let userName = "";
+
+    // 3. ON LAUNCH LOAD SETTINGS
+    window.addEventListener('DOMContentLoaded', () => {
+      // Check local storage for dark mode
+      if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      updateThemeButtons();
+    });
+
+    // Theme Management
+    function toggleTheme() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('color-theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('color-theme', 'dark');
+      }
+      updateThemeButtons();
+    }
+
+    function updateThemeButtons() {
+      const sunIcon = document.getElementById('sunIcon');
+      const moonIcon = document.getElementById('moonIcon');
+      if (document.documentElement.classList.contains('dark')) {
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+      } else {
+        sunIcon.classList.add('hidden');
+        moonIcon.classList.remove('hidden');
+      }
+    }
+
+    // 4. SCREEN CONTROLLER
+    function showScreen(screenId) {
+      const screens = ['landingScreen', 'theoryScreen', 'quizScreen', 'processingScreen', 'resultScreen'];
+      screens.forEach(id => {
+        const el = document.getElementById(id);
+        if (id === screenId) {
+          el.classList.remove('screen-hidden');
+          el.classList.add('screen-visible');
+        } else {
+          el.classList.remove('screen-visible');
+          el.classList.add('screen-hidden');
+        }
+      });
+      // Scroll to top on change
+      window.scrollTo(0, 0);
+    }
+
+    function showTheoryScreen(tabId) {
+      showScreen('theoryScreen');
+      switchTheoryTab(tabId || 'vark');
+    }
+
+    function switchTheoryTab(tabId) {
+      const varkTabBtn = document.getElementById('tabBtnVark');
+      const kolbTabBtn = document.getElementById('tabBtnKolb');
+      const refTabBtn = document.getElementById('tabBtnRef');
+      const varkContent = document.getElementById('theoryVarkContent');
+      const kolbContent = document.getElementById('theoryKolbContent');
+      const refContent = document.getElementById('theoryReferencesContent');
+      
+      const activeClass = 'w-1/3 py-3 text-center border-b-2 border-brand-500 text-brand-600 dark:text-brand-400 text-xs sm:text-sm font-bold transition-all';
+      const inactiveClass = 'w-1/3 py-3 text-center border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 text-xs sm:text-sm font-semibold transition-all';
+      
+      if (tabId === 'vark') {
+        varkTabBtn.className = activeClass;
+        kolbTabBtn.className = inactiveClass;
+        refTabBtn.className = inactiveClass;
+        varkContent.classList.remove('hidden');
+        kolbContent.classList.add('hidden');
+        refContent.classList.add('hidden');
+      } else if (tabId === 'kolb') {
+        kolbTabBtn.className = activeClass;
+        varkTabBtn.className = inactiveClass;
+        refTabBtn.className = inactiveClass;
+        kolbContent.classList.remove('hidden');
+        varkContent.classList.add('hidden');
+        refContent.classList.add('hidden');
+      } else {
+        refTabBtn.className = activeClass;
+        varkTabBtn.className = inactiveClass;
+        kolbTabBtn.className = inactiveClass;
+        refContent.classList.remove('hidden');
+        varkContent.classList.add('hidden');
+        kolbContent.classList.add('hidden');
+      }
+    }
+
+    // 5. QUIZ INTERACTIONS
+    function startQuiz() {
+      const nameInput = document.getElementById('userName');
+      userName = nameInput.value.trim() || "นักเรียนรู้";
+      
+      currentQuestionIndex = 0;
+      userAnswers = new Array(quizQuestions.length).fill(null);
+      
+      showScreen('quizScreen');
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const currentQuestion = quizQuestions[currentQuestionIndex];
+      
+      // Update numbers and navigation buttons
+      document.getElementById('currentQuestionNum').innerText = currentQuestionIndex + 1;
+      document.getElementById('totalQuestionsNum').innerText = quizQuestions.length;
+      
+      // Progress Bar calculation
+      const progress = ((currentQuestionIndex) / quizQuestions.length) * 100;
+      document.getElementById('progressBar').style.width = `${progress}%`;
+      document.getElementById('progressPercent').innerText = `${Math.round(progress)}%`;
+      
+      // Disable Prev Button if at first question
+      const btnPrev = document.getElementById('btnPrev');
+      if (currentQuestionIndex === 0) {
+        btnPrev.classList.add('opacity-40', 'pointer-events-none');
+      } else {
+        btnPrev.classList.remove('opacity-40', 'pointer-events-none');
+      }
+
+      // Card animation effect (slide right to left effect)
+      const card = document.getElementById('questionCard');
+      card.classList.add('slide-in-right');
+      
+      setTimeout(() => {
+        card.classList.remove('slide-in-right');
+        document.getElementById('questionText').innerText = currentQuestion.scenario;
+        
+        // Generate options HTML
+        const container = document.getElementById('optionsContainer');
+        container.innerHTML = '';
+        
+        currentQuestion.options.forEach((opt, idx) => {
+          const isSelected = userAnswers[currentQuestionIndex] === idx;
+          const optionEl = document.createElement('button');
+          optionEl.onclick = () => selectOption(idx);
+          optionEl.className = `w-full text-left p-4 rounded-2xl transition-all duration-200 border flex items-start space-x-4 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${
+            isSelected 
+            ? 'bg-brand-500/10 border-brand-500 text-brand-700 dark:text-brand-300 ring-1 ring-brand-500 scale-[1.01] shadow-md shadow-brand-500/5' 
+            : 'bg-white/40 dark:bg-slate-900/30 hover:bg-slate-100 dark:hover:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:scale-[1.005]'
+          }`;
+          
+          let optionIcon = '🔘';
+          if (opt.vark === 'V') optionIcon = '👁️';
+          else if (opt.vark === 'A') optionIcon = '👂';
+          else if (opt.vark === 'R') optionIcon = '📖';
+          else if (opt.vark === 'K') optionIcon = '🖐️';
+
+          optionEl.innerHTML = `
+            <div class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-xl font-bold ${
+              isSelected 
+              ? 'bg-brand-500 text-white' 
+              : 'bg-slate-200/60 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+            }">
+              ${opt.letter}
+            </div>
+            <div class="flex-grow space-y-1">
+              <p class="text-sm font-medium leading-relaxed">${opt.text}</p>
+              <div class="flex items-center space-x-2 text-[10px] ${isSelected ? 'text-brand-600/80 dark:text-brand-400/80' : 'text-slate-400 dark:text-slate-500'}">
+                <span>ช่องรับสาร: ${optionIcon} ${opt.vark}</span>
+                <span>•</span>
+                <span>วงจรคิด: ${opt.kolb}</span>
+              </div>
+            </div>
+          `;
+          
+          container.appendChild(optionEl);
+        });
+      }, 100);
+    }
+
+    function selectOption(optionIndex) {
+      userAnswers[currentQuestionIndex] = optionIndex;
+      
+      // Highlight selection and automatically navigate after a short delay
+      loadQuestion(); // Reload current view to update class states
+      
+      setTimeout(() => {
+        if (currentQuestionIndex < quizQuestions.length - 1) {
+          nextQuestion();
+        } else {
+          // Final question completed -> Run calculation loading
+          finishQuiz();
+        }
+      }, 250);
+    }
+
+    function nextQuestion() {
+      if (currentQuestionIndex < quizQuestions.length - 1) {
+        const card = document.getElementById('questionCard');
+        card.classList.add('slide-out-left');
+        
+        setTimeout(() => {
+          card.classList.remove('slide-out-left');
+          currentQuestionIndex++;
+          loadQuestion();
+        }, 200);
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        const card = document.getElementById('questionCard');
+        card.classList.add('slide-in-right');
+        
+        setTimeout(() => {
+          card.classList.remove('slide-in-right');
+          currentQuestionIndex--;
+          loadQuestion();
+        }, 200);
+      }
+    }
+
+    // 6. FINISH & SIMULATE CALCULATION
+    function finishQuiz() {
+      // Show full progress bar
+      document.getElementById('progressBar').style.width = `100%`;
+      document.getElementById('progressPercent').innerText = `100%`;
+
+      showScreen('processingScreen');
+      
+      // Simulated loading status changes for immersive UI
+      const statuses = [
+        "INITIALIZING NEURAL MAPPING...",
+        "SUMMING VARK SCORE SCALES...",
+        "CONSTRUCTING KOLB EXPERIENCE CYCLES...",
+        "GENERATING PERSONAL DEVELOPMENT PLAN...",
+        "FINALIZING COGNITIVE PROFILE REPORT..."
+      ];
+      
+      let statusIdx = 0;
+      const statusInterval = setInterval(() => {
+        if (statusIdx < statuses.length) {
+          document.getElementById('loadingStatusText').innerText = statuses[statusIdx];
+          statusIdx++;
+        }
+      }, 400);
+
+      setTimeout(() => {
+        clearInterval(statusInterval);
+        processResults();
+      }, 2200);
+    }
+
+    // 7. RESULT CALCULATION ENGINE
+    function processResults() {
+      // Reset scores
+      const vark = { V: 0, A: 0, R: 0, K: 0 };
+      const kolb = { CE: 0, RO: 0, AC: 0, AE: 0 };
+      
+      userAnswers.forEach((selectedIdx, qIdx) => {
+        if (selectedIdx !== null) {
+          const selectedOption = quizQuestions[qIdx].options[selectedIdx];
+          vark[selectedOption.vark]++;
+          kolb[selectedOption.kolb]++;
+        }
+      });
+      
+      // Evaluate dominant VARK
+      const varkDominant = getDominantVARK(vark);
+      
+      // Evaluate dominant Kolb
+      const kolbResult = getDominantKolb(kolb);
+
+      // Render User info
+      document.getElementById('displayUserName').innerText = userName;
+      
+      // Update DOM with results
+      renderVARKResult(varkDominant, vark);
+      renderKolbResult(kolbResult, kolb);
+      
+      // Render visual charts (radar & coordinate grid)
+      renderVARKRadarChart(vark);
+      renderKolbGridChart(kolb);
+      
+      // Update breakdown details
+      renderDetailBreakdowns(varkDominant.style, kolbResult.style);
+      
+      // Update actionable lists
+      renderActionableAdvice(varkDominant.style, kolbResult.style);
+
+      showScreen('resultScreen');
+    }
+
+    // Helper: VARK dominant checker
+    function getDominantVARK(scores) {
+      const maxVal = Math.max(scores.V, scores.A, scores.R, scores.K);
+      const candidates = [];
+      if (scores.V === maxVal) candidates.push('V');
+      if (scores.A === maxVal) candidates.push('A');
+      if (scores.R === maxVal) candidates.push('R');
+      if (scores.K === maxVal) candidates.push('K');
+      
+      // If there's a tie, classify as Multimodal
+      if (candidates.length > 1) {
+        return {
+          style: 'M',
+          title: "Multimodal Learner (ผู้เรียนแบบหลากหลายด้าน)",
+          emoji: "🎭",
+          desc: "คุณรับสารได้มีประสิทธิภาพจากหลายช่องทางพร้อมกัน สมองมีความยืดหยุ่นสูง สามารถจัดกลุ่มและแปลความหมายจากรูปภาพ เสียง บทความ และการขยับสัญชาตญาณได้อย่างสมดุล ขึ้นอยู่กับสถานการณ์และสิ่งแวดล้อมที่เหมาะสม"
+        };
+      }
+      
+      const dominant = candidates[0];
+      const details = {
+        'V': {
+          style: 'V',
+          title: "Visual Learner (เน้นเรียนรู้ทางจักษุ/การมองเห็น)",
+          emoji: "👁️",
+          desc: "คุณมีสมรรถนะยอดเยี่ยมในการเก็บรายละเอียดข้อมูลผ่านแผนผัง แผนที่ สีสัน โครงสร้างองค์รวม และจินตนาการภาพในสมอง สมองประมวลสัญลักษณ์ต่างๆ และการจัดพื้นที่รูปทรงเรขาคณิตได้ดีเป็นพิเศษ"
+        },
+        'A': {
+          style: 'A',
+          title: "Auditory Learner (เน้นเรียนรู้ทางโสต/การฟังและการพูด)",
+          emoji: "👂",
+          desc: "คุณเปิดรับข้อมูลและเข้าใจหัวข้อที่ลึกซึ้งได้รวดเร็วผ่านเสียงพูด เสียงเคาะทำนอง การฟังบรรยาย และการถกเถียงปัญหาแบบมองหน้า สมองจดจำคำอธิบาย สุ้มเสียง และจังหวะของการสื่อสารด้วยวจีได้อย่างมั่นคง"
+        },
+        'R': {
+          style: 'R',
+          title: "Read/Write Learner (เน้นเรียนรู้ทางการอ่านและการเขียน)",
+          emoji: "📖",
+          desc: "คุณเรียนรู้ได้มีประสิทธิภาพสูงในการจดบันทึก การอ่านคู่มือ ข้อความเรียบเรียง หรือการขีดเส้นใต้ใจความสำคัญ สมองของคุณชอบความแน่นอนที่เป็นทางการ รายงานลายลักษณ์อักษร และโครงสร้างตัวหนังสือชัดเจน"
+        },
+        'K': {
+          style: 'K',
+          title: "Kinesthetic Learner (เน้นเรียนรู้ทางกาย/การสัมผัสและการทำ)",
+          emoji: "🖐️",
+          desc: "คุณชอบความรู้สึกจากการหยิบจับ การแกะแงะ การออกแรงร่างกาย และประสบการณ์ลองผิดลองถูกแบบเรียลไทม์ สมองของคุณเรียนรู้ด้วยระบบความจำกล้ามเนื้อ (Muscle Memory) และการเผชิญหน้าหน้างานจริง"
+        }
+      };
+      
+      return details[dominant];
+    }
+
+    // Helper: Kolb dominant checker
+    function getDominantKolb(scores) {
+      // Coordinates calculation
+      const xDiff = scores.RO - scores.AE; // Reflective Watching vs Active Doing (Positive X = Reflective)
+      const yDiff = scores.CE - scores.AC; // Concrete Feeling vs Abstract Thinking (Positive Y = Concrete Feeling)
+      
+      let style = '';
+      let title = '';
+      let emoji = '';
+      let desc = '';
+      
+      if (xDiff >= 0 && yDiff >= 0) {
+        style = 'Diverger';
+        title = "Diverger (นักมองรอบด้าน / ผู้มีจินตนาการ)";
+        emoji = "🧭";
+        desc = "เน้นการสร้างสรรค์ไอเดียและการมองมุมกลับ (Concrete Experience + Reflective Observation) คุณมีความเห็นอกเห็นใจสูง สนใจพฤติกรรมมนุษย์และสิ่งแวดล้อม ชอบรวบรวมไอเดียและความเป็นไปได้ที่แปลกใหม่";
+      } else if (xDiff >= 0 && yDiff < 0) {
+        style = 'Assimilator';
+        title = "Assimilator (นักวิเคราะห์ / ผู้สร้างแผนงาน)";
+        emoji = "🧬";
+        desc = "เน้นการคิดวิเคราะห์ข้อมูลเชิงลึกและทฤษฎี (Abstract Conceptualization + Reflective Observation) คุณชอบความเป็นระบบระเบียบ การวางกรอบทฤษฎีที่จับต้องได้มากกว่าความกังวลในตัวบุคคล";
+      } else if (xDiff < 0 && yDiff < 0) {
+        style = 'Converger';
+        title = "Converger (นักประยุกต์ทฤษฎี / นักแก้ปัญหา)";
+        emoji = "🎯";
+        desc = "เน้นการลงมือปฏิบัติเพื่อแก้ปัญหาเฉพาะทาง (Abstract Conceptualization + Active Experimentation) คุณเป็นนักวางแผนเป้าหมาย แก้ปัญหาด้วยหลักการทางเทคนิค และหาจุดเหมาะสมที่สุดจุดเดียวในการตัดสินใจ";
+      } else {
+        style = 'Accommodator';
+        title = "Accommodator (นักปรับตัว / ลุยปฏิบัติหน้างาน)";
+        emoji = "⚡";
+        desc = "เน้นการลงมือลุยงานตรงหน้าร่วมกับการสัมผัสสิ่งแวดล้อม (Concrete Experience + Active Experimentation) คุณตอบสนองอย่างรวดเร็ว ทำงานฉับไวตามสัญชาตญาณ และปรับแผนได้อย่างคล่องตัวเมื่อสถานการณ์พลิกผัน";
+      }
+      
+      return { style, title, emoji, desc, x: xDiff, y: yDiff };
+    }
+
+    // Render results basic text info
+    function renderVARKResult(varkDom, varkScores) {
+      document.getElementById('varkEmoji').innerText = varkDom.emoji;
+      document.getElementById('varkStyleName').innerText = varkDom.title;
+      document.getElementById('varkDominantDesc').innerText = varkDom.desc;
+      
+      // Update small score display boxes
+      document.getElementById('scoreValV').innerText = varkScores.V;
+      document.getElementById('scoreValA').innerText = varkScores.A;
+      document.getElementById('scoreValR').innerText = varkScores.R;
+      document.getElementById('scoreValK').innerText = varkScores.K;
+    }
+
+    function renderKolbResult(kolbDom, kolbScores) {
+      document.getElementById('kolbEmoji').innerText = kolbDom.emoji;
+      document.getElementById('kolbStyleName').innerText = kolbDom.title;
+      document.getElementById('kolbDominantDesc').innerText = kolbDom.desc;
+      
+      // Update small score display boxes
+      document.getElementById('scoreValCE').innerText = kolbScores.CE;
+      document.getElementById('scoreValRO').innerText = kolbScores.RO;
+      document.getElementById('scoreValAC').innerText = kolbScores.AC;
+      document.getElementById('scoreValAE').innerText = kolbScores.AE;
+    }
+
+    // 8. CUSTOM DYNAMIC SVG RADAR CHART GENERATOR
+    function renderVARKRadarChart(scores) {
+      const maxScore = quizQuestions.length; // Max score for 1 category is the number of questions
+      const cx = 150, cy = 150, r = 100;
+      
+      // Calculate points, ensure minimum values so plot doesn't shrink to 0 completely
+      const v_val = Math.max(0.8, scores.V) / maxScore * r;
+      const a_val = Math.max(0.8, scores.A) / maxScore * r;
+      const r_val = Math.max(0.8, scores.R) / maxScore * r;
+      const k_val = Math.max(0.8, scores.K) / maxScore * r;
+      
+      const pV = { x: cx, y: cy - v_val };
+      const pA = { x: cx + a_val, y: cy };
+      const pR = { x: cx, y: cy + r_val };
+      const pK = { x: cx - k_val, y: cy };
+      
+      const varkSvg = `
+        <svg viewBox="0 0 300 300" class="w-full h-auto max-w-[280px]">
+          <!-- Back Grid Polygons -->
+          <polygon points="${cx},${cy-r} ${cx+r},${cy} ${cx},${cy+r} ${cx-r},${cy}" fill="none" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1" />
+          <polygon points="${cx},${cy-r*0.75} ${cx+r*0.75},${cy} ${cx},${cy+r*0.75} ${cx-r*0.75},${cy}" fill="none" class="stroke-slate-200 dark:stroke-slate-800" stroke-width="1" stroke-dasharray="4" />
+          <polygon points="${cx},${cy-r*0.5} ${cx+r*0.5},${cy} ${cx},${cy+r*0.5} ${cx-r*0.5},${cy}" fill="none" class="stroke-slate-200 dark:stroke-slate-800" stroke-width="1" stroke-dasharray="4" />
+          <polygon points="${cx},${cy-r*0.25} ${cx+r*0.25},${cy} ${cx},${cy+r*0.25} ${cx-r*0.25},${cy}" fill="none" class="stroke-slate-300 dark:stroke-slate-700" stroke-width="1" />
+          
+          <!-- Cross axis lines -->
+          <line x1="${cx}" y1="${cy-r}" x2="${cx}" y2="${cy+r}" class="stroke-slate-300 dark:stroke-slate-800" stroke-width="1.2" />
+          <line x1="${cx-r}" y1="${cy}" x2="${cx+r}" y2="${cy}" class="stroke-slate-300 dark:stroke-slate-800" stroke-width="1.2" />
+          
+          <!-- Axis Labels -->
+          <text x="${cx}" y="${cy - r - 12}" text-anchor="middle" class="text-xs font-bold fill-slate-700 dark:fill-slate-300">Visual (${scores.V})</text>
+          <text x="${cx + r + 8}" y="${cy + 4}" text-anchor="start" class="text-xs font-bold fill-slate-700 dark:fill-slate-300">Auditory (${scores.A})</text>
+          <text x="${cx}" y="${cy + r + 20}" text-anchor="middle" class="text-xs font-bold fill-slate-700 dark:fill-slate-300">Read/Write (${scores.R})</text>
+          <text x="${cx - r - 8}" y="${cy + 4}" text-anchor="end" class="text-xs font-bold fill-slate-700 dark:fill-slate-300">Kinesthetic (${scores.K})</text>
+          
+          <!-- Data area outline -->
+          <polygon points="${pV.x},${pV.y} ${pA.x},${pA.y} ${pR.x},${pR.y} ${pK.x},${pK.y}" 
+            fill="rgba(139, 92, 246, 0.22)" class="stroke-brand-500 dark:stroke-brand-400" stroke-width="2.5" stroke-linejoin="round" />
+          
+          <!-- Anchored dots -->
+          <circle cx="${pV.x}" cy="${pV.y}" r="4.5" class="fill-brand-600 dark:fill-brand-400 stroke-white dark:stroke-slate-950" stroke-width="1.5" />
+          <circle cx="${pA.x}" cy="${pA.y}" r="4.5" class="fill-brand-600 dark:fill-brand-400 stroke-white dark:stroke-slate-950" stroke-width="1.5" />
+          <circle cx="${pR.x}" cy="${pR.y}" r="4.5" class="fill-brand-600 dark:fill-brand-400 stroke-white dark:stroke-slate-950" stroke-width="1.5" />
+          <circle cx="${pK.x}" cy="${pK.y}" r="4.5" class="fill-brand-600 dark:fill-brand-400 stroke-white dark:stroke-slate-950" stroke-width="1.5" />
+          
+          <!-- Center point -->
+          <circle cx="${cx}" cy="${cy}" r="3" class="fill-slate-400 dark:fill-slate-600" />
+        </svg>
+      `;
+      
+      document.getElementById('varkChartContainer').innerHTML = varkSvg;
+    }
+
+    // 9. CUSTOM DYNAMIC SVG KOLB 2D GRID SCATTER PLOTTER
+    function renderKolbGridChart(scores) {
+      const maxScore = quizQuestions.length; // Max score for 1 category
+      const cx = 150, cy = 150, r = 100;
+      
+      // Raw axis differences
+      const xDiff = scores.RO - scores.AE; // RO = Reflective (Right, positive), AE = Active (Left, negative)
+      const yDiff = scores.CE - scores.AC; // CE = Concrete (Top, positive), AC = Abstract (Bottom, negative)
+      
+      // Calculate dot coordinates
+      const px = cx + (xDiff / maxScore) * r;
+      const py = cy - (yDiff / maxScore) * r; // Minus because SVG coordinate y decreases upward
+      
+      const kolbSvg = `
+        <svg viewBox="0 0 300 300" class="w-full h-auto max-w-[280px]">
+          <defs>
+            <!-- Quadrant visual fills -->
+            <linearGradient id="gAccommodator" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.06"/>
+              <stop offset="100%" stop-color="#d97706" stop-opacity="0.01"/>
+            </linearGradient>
+            <linearGradient id="gDiverger" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ec4899" stop-opacity="0.06"/>
+              <stop offset="100%" stop-color="#db2777" stop-opacity="0.01"/>
+            </linearGradient>
+            <linearGradient id="gAssimilator" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.06"/>
+              <stop offset="100%" stop-color="#2563eb" stop-opacity="0.01"/>
+            </linearGradient>
+            <linearGradient id="gConverger" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#10b981" stop-opacity="0.06"/>
+              <stop offset="100%" stop-color="#059669" stop-opacity="0.01"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Quadrant Background rects -->
+          <!-- Top Left: Accommodator (CE & AE) -->
+          <rect x="${cx - r}" y="${cy - r}" width="${r}" height="${r}" fill="url(#gAccommodator)" />
+          <!-- Top Right: Diverger (CE & RO) -->
+          <rect x="${cx}" y="${cy - r}" width="${r}" height="${r}" fill="url(#gDiverger)" />
+          <!-- Bottom Right: Assimilator (AC & RO) -->
+          <rect x="${cx}" y="${cy}" width="${r}" height="${r}" fill="url(#gAssimilator)" />
+          <!-- Bottom Left: Converger (AC & AE) -->
+          <rect x="${cx - r}" y="${cy}" width="${r}" height="${r}" fill="url(#gConverger)" />
+
+          <!-- Boundary box -->
+          <rect x="${cx - r}" y="${cy - r}" width="${2*r}" height="${2*r}" fill="none" class="stroke-slate-300 dark:stroke-slate-800" stroke-width="1.2" />
+
+          <!-- Center major axes -->
+          <line x1="${cx}" y1="${cy - r}" x2="${cx}" y2="${cy + r}" class="stroke-slate-400 dark:stroke-slate-700" stroke-width="1.5" />
+          <line x1="${cx - r}" y1="${cy}" x2="${cx + r}" y2="${cy}" class="stroke-slate-400 dark:stroke-slate-700" stroke-width="1.5" />
+
+          <!-- Grid ticks -->
+          <line x1="${cx - r*0.5}" y1="${cy-3}" x2="${cx - r*0.5}" y2="${cy+3}" class="stroke-slate-400 dark:stroke-slate-700" />
+          <line x1="${cx + r*0.5}" y1="${cy-3}" x2="${cx + r*0.5}" y2="${cy+3}" class="stroke-slate-400 dark:stroke-slate-700" />
+          <line x1="${cx-3}" y1="${cy - r*0.5}" x2="${cx+3}" y2="${cy - r*0.5}" class="stroke-slate-400 dark:stroke-slate-700" />
+          <line x1="${cx-3}" y1="${cy + r*0.5}" x2="${cx+3}" y2="${cy + r*0.5}" class="stroke-slate-400 dark:stroke-slate-700" />
+
+          <!-- Axis Edge Labels -->
+          <text x="${cx}" y="${cy - r - 12}" text-anchor="middle" class="text-[10px] font-semibold fill-amber-600 dark:fill-amber-400">Concrete Feeling (CE)</text>
+          <text x="${cx + r + 8}" y="${cy + 4}" text-anchor="start" class="text-[10px] font-semibold fill-pink-600 dark:fill-pink-400">Reflective (RO)</text>
+          <text x="${cx}" y="${cy + r + 18}" text-anchor="middle" class="text-[10px] font-semibold fill-blue-600 dark:fill-blue-400">Abstract Thinking (AC)</text>
+          <text x="${cx - r - 8}" y="${cy + 4}" text-anchor="end" class="text-[10px] font-semibold fill-emerald-600 dark:fill-emerald-400">Active Doing (AE)</text>
+
+          <!-- Quadrant Text Overlays (Watermark) -->
+          <text x="${cx - r/2}" y="${cy - r/2}" text-anchor="middle" class="text-[9px] font-bold fill-slate-300 dark:fill-slate-800 uppercase tracking-wider">Accommodator</text>
+          <text x="${cx + r/2}" y="${cy - r/2}" text-anchor="middle" class="text-[9px] font-bold fill-slate-300 dark:fill-slate-800 uppercase tracking-wider">Diverger</text>
+          <text x="${cx + r/2}" y="${cy + r/2}" text-anchor="middle" class="text-[9px] font-bold fill-slate-300 dark:fill-slate-800 uppercase tracking-wider">Assimilator</text>
+          <text x="${cx - r/2}" y="${cy + r/2}" text-anchor="middle" class="text-[9px] font-bold fill-slate-300 dark:fill-slate-800 uppercase tracking-wider">Converger</text>
+
+          <!-- User coordinate point marker -->
+          <!-- Pulse animation concentric rings -->
+          <circle cx="${px}" cy="${py}" r="12" fill="rgba(139, 92, 246, 0.15)" class="animate-pulse" />
+          <circle cx="${px}" cy="${py}" r="6" class="fill-brand-500 dark:fill-brand-400 stroke-white dark:stroke-slate-950" stroke-width="2" />
+        </svg>
+      `;
+      
+      document.getElementById('kolbChartContainer').innerHTML = kolbSvg;
+    }
+
+    // 10. DETAILED FEEDBACK TRANSLATOR
+    function renderDetailBreakdowns(varkStyle, kolbStyle) {
+      const varkData = {
+        'V': "ผู้เรียนรู้สไตล์สายจักษุของคุณขับเคลื่อนโดยตรงผ่าน 'ภาพประกอบที่มีลำดับขั้นตอนเป็นระเบียบชัดเจน' สมองของคุณสามารถจำจังหวะการเลื่อนสไลด์ แถบสี และไดอะแกรมได้แม่นยำมาก โดยจะประมวลผลข้อมูลใหม่ได้ดีที่สุดเมื่อเห็นความสัมพันธ์เชิงพิกัด ตำแหน่ง และระยะขอบของพื้นที่",
+        'A': "ผู้เรียนรู้สไตล์สายโสตของคุณขับเคลื่อนโดยตรงผ่าน 'คำอธิบาย คำบอกเล่า และเสียงอภิปราย' คุณมีความอ่อนไหวสูงต่อโทนเสียงและเสียงตอบรับของคู่สื่อสาร สมองของคุณเรียนรู้ด้วยการถกเถียงและเปลี่ยนความคิดผ่านวาจา คุณจะจดจำสิ่งที่จะได้ยินได้ยาวนานที่สุด",
+        'R': "ผู้เรียนรู้สไตล์สายอ่านเขียนของคุณประมวลผลผ่าน 'ขุมข้อมูลอักษร รายงานสถิติ และสรุปย่อ' คุณมีความเชี่ยวชาญสูงในการกรองข้อมูลจากเอกสารวิชาการหนาๆ หรือเว็บบล็อกแปลกใหม่ สมองชื่นชอบความแน่นอนและมีความแม่นยำทางคำขยายความที่ชัดเจน",
+        'K': "ผู้เรียนรู้สไตล์สายลงมือทำและขยับตัวสัมผัสของคุณเน้นที่ 'การจำลองสถานการณ์และการสะสมประสบการณ์ตรง' สมองชอบการเรียนรู้อย่างมีความหมายผ่านระบบกล้ามเนื้อร่างกาย คุณต้องการทดสอบหน้างาน ลิงก์นิ้วมือ หรือเปลี่ยนสัญชาตญาณเมื่อเกิดเหตุจริง",
+        'M': "ผู้เรียนรู้สไตล์ผสมมัลติโมดอลของคุณมีความสามารถในการหยิบชิ้นข้อมูลแต่ละด้านมารวมกัน คุณสแกนข้อมูลจากสัญลักษณ์สายตาร่วมกับการฟังบรรยาย แล้วจดลงกระดาษก่อนลงมือลุยงาน ทำให้แนวทางการสรุปแนวคิดประยุกต์ของคุณมีความลื่นไหลเป็นธรรมชาติตามขอบเขตงาน"
+      };
+
+      const thinkingData = {
+        'Diverger': "กระบวนการคิดของคุณเป็นแนว 'มองภาพรวม กว้างลึก และสะท้อนประเมินความสมดุล' คุณหลีกเลี่ยงการสรุปความแบบด่วนรีบ ชอบวิเคราะห์แนวทางเลือกที่หลากหลายเพื่อประเมินความอ่อนโยนต่อทีม มีความฉลาดในการคิดเชิงจินตนาการและหลงใหลการระดมสมอง",
+        'Assimilator': "กระบวนการคิดของคุณเป็นแนว 'คิดวิเคราะห์เชิงระบบ ลำดับตรรกะ และอิงเกณฑ์ทฤษฎีสากล' คุณสร้างระบบการจัดเก็บข้อมูลในหัวได้อย่างชัดเจน คิดก่อนลงมือลุย และเก่งในการหาความสอดคล้องเชิงโครงสร้างและการจัดทำแผนแม่บทที่มีประสิทธิภาพ",
+        'Converger': "กระบวนการคิดของคุณเป็นแนว 'คิดแบบมุ่งประเด็น ตอบโจทย์เป้าหมาย และประยุกต์ทฤษฎีสู่ความจริง' คุณตัดข้อมูลส่วนเกินออกอย่างรวดเร็วเพื่อหาแนวทางประหยัดและเกิดผลงานจริงเด่นชัดที่สุด ชื่นชอบโจทย์เทคนิคเชิงโครงสร้างและการไขความคลุมเครือ",
+        'Accommodator': "กระบวนการคิดของคุณเป็นแนว 'คิดนอกกรอบ ยืดหยุ่นขยับตัว และเอาชนะอุปสรรคแบบวินาทีต่อวินาที' คุณไม่ยึดติดกับทฤษฎีที่ไม่ตอบสนองความเป็นจริง มีสัญชาตญาณไหวพริบยอดเยี่ยม พร้อมยอมรับความเสี่ยงเพื่อค้นพบคำตอบใหม่ๆ หน้างานจริง"
+      };
+
+      const communicationData = {
+        'V': "สไตล์การสื่อสารของคุณให้ความสำคัญกับ 'ความงามและการสะกดสายตา' คุณสื่อสารได้ดีมากเมื่อใช้แผนภาพช่วยนำเสนอ ชื่นชอบการอธิบายสรุปสั้นๆ ด้วยกราฟอินโฟกราฟิก หรือใช้การจัดโครงสร้างเอกสารให้อ่านง่าย สบายตา",
+        'A': "สไตล์การสื่อสารของคุณให้ความสำคัญกับ 'การสนทนาและการเคารพจังหวะฟัง' คุณเข้าใจความรู้สึกของเพื่อนร่วมงานได้ดีผ่านน้ำเสียง การรับสายแบบโทรคุยจะทำให้คุณจับประเด็นและปิดดีลงานได้มีประสิทธิภาพมากกว่าการพิมพ์อีเมลยาวๆ",
+        'R': "สไตล์การสื่อสารของคุณให้ความสำคัญกับ 'ข้อตกลงลายลักษณ์อักษรและการสรุปประเด็นเป็นข้อๆ' คุณประทับใจความถูกต้องในตัวเลขและหลักการ มักสื่อสารด้วยอีเมล เอกสารสรุปเช็คลิสต์ หรือสไลด์แบบ Bullet Point ที่เคลียร์ชัดเจน",
+        'K': "สไตล์การสื่อสารของคุณให้ความสำคัญกับ 'การสาธิตให้ดูจริงและการแสดงประกอบทางร่างกาย' คุณสื่อสารอย่างกระตือรือร้น ชอบพูดคุยพร้อมขยับตัวหรือเดินรอบโต๊ะเพื่อสื่ออารมณ์ และมักพูดชวนทีมทำ Workshop เพื่อให้มองภาพความก้าวหน้าร่วมกัน",
+        'M': "สไตล์การสื่อสารของคุณมีความยืดหยุ่นหลากหลายมิติ คุณสามารถสลับช่องทางการเล่าเรื่องได้ตามความพร้อมของผู้ฟัง ทั้งส่งอีเมลชี้แจง พูดคุยเสียงสะท้อน หรือลุยร่างแผนภาพให้ดูหน้ากระดาน ทำให้คุณทำงานในทีมที่มีความแตกต่างได้ดีที่สุด"
+      };
+
+      document.getElementById('detailLearningStyle').innerText = varkData[varkStyle] || "";
+      document.getElementById('detailThinkingStyle').innerText = thinkingData[kolbStyle] || "";
+      document.getElementById('detailCommunicationStyle').innerText = communicationData[varkStyle] || "";
+    }
+
+    // 11. PERSONALIZED ACTIONABLE ADVICE ENGINE
+    function renderActionableAdvice(varkStyle, kolbStyle) {
+      const varkAdvices = {
+        'V': [
+          "<strong>จัดโต๊ะทำงานให้มีสิ่งกระตุ้นสายตาเป็นระบบ:</strong> ใช้บอร์ดติดผนังแปะแผนภูมิสีสัน เพื่อกระตุ้นสมองในการจำภาพรวม",
+          "<strong>ฝึกฝนการใช้ซอฟต์แวร์ Mindmap:</strong> จัดระเบียบหัวข้อความรู้ใหม่เป็นแผนผังความคิดที่แบ่งสีและโยงแกนหลักอย่างชัดเจน",
+          "<strong>ใช้ปากกาไฮไลท์หลากสี (Color-coding):</strong> แยกข้อมูลส่วนที่สำคัญที่สุด ปัญหารอง และส่วนข้อมูลเชิงวิชาการด้วยรหัสสีคงที่",
+          "<strong>เปลี่ยนบทความตัวหนังสือให้เป็นภาพ:</strong> วาดไอคอนสัญลักษณ์ประกอบข้อความยากๆ เพื่อให้สมองเรียกใช้ความจำภาพเวลาทบทวน"
+        ],
+        'A': [
+          "<strong>บันทึกเสียงสรุปและเปิดทบทวน:</strong> อัดคลิปเสียงสั้นๆ ของตัวเองบรรยายสรุปเนื้อหางาน เพื่อเอาไว้เปิดฟังสบายๆ ตอนนั่งรถ",
+          "<strong>ใช้วิธีอธิบายเป็ดเหลือง (Rubber Ducking):</strong> หาของเล่นหรืออธิบายประเด็นปัญหาให้เพื่อนฟังเสียงดังๆ เพื่อช่วยกระตุ้นวงจรคิดในสมอง",
+          "<strong>สร้างกลุ่มหารือย่อย:</strong> สรุปหัวข้อสำคัญผ่านการจับเข่าคุย แลกเปลี่ยนถาม-ตอบกับเพื่อนร่วมชั้นหรือผู้มีความรู้ความชำนาญ",
+          "<strong>จำกัดเสียงรบกวนภายนอก:</strong> หาที่อ่านหนังสือหรือทำงานที่เงียบสงัด หรือเปิดฟังเสียงคลื่นธรรมชาติ (White Noise) เพื่อช่วยรวบรวมสมาธิ"
+        ],
+        'R': [
+          "<strong>สรุปข้อมูลด้วยตนเองเป็น Bullet points:</strong> หลีกเลี่ยงบทความยาวไม่เป็นทางการ แปลผลให้เหลือประเด็นสรุปตัวหนังสือสั้นๆ เคลียร์ๆ",
+          "<strong>ขยันอ่านบทความวิจัยและวิกิคู่มือ:</strong> ค้นหาข้อมูลเพิ่มจาก e-books หรือคู่มือต้นฉบับอย่างลึกซึ้งเพื่อยึดเหนี่ยวกรอบเหตุและผล",
+          "<strong>จดบันทึกด้วยระบบคำหลัก (Key phrases):</strong> เขียนคำศัพท์เทคนิคพร้อมประโยคนิยามอย่างสม่ำเสมอลงในสมุดโน้ตส่วนตัว",
+          "<strong>สร้างแบบฟอร์มรายงานสถิติ:</strong> จัดเก็บสถิติเปรียบเทียบในแผ่นสเปรดชีตที่มีตารางข้อมูลชัดเจนเพื่อประกอบการวิเคราะห์รายวัน"
+        ],
+        'K': [
+          "<strong>ประยุกต์ทฤษฎีผ่านมินิโปรเจกต์ (Mini-projects):</strong> ลงมือทำเวิร์กชอปเล็กๆ หรือทำชิ้นงานจำลองทันทีเพื่อให้สมองจดจำนิ้วมือ",
+          "<strong>แบ่งเวลาทำงานเป็นบล็อกย่อย (Pomodoro Technique):</strong> ทำงาน 25 นาทีและขยับตัวลุกขึ้นยืดเส้นยืดสาย 5 นาที ป้องกันความเมื่อยล้าสมอง",
+          "<strong>เดินอ่านหนังสือหรือทบทวนข้อมูล:</strong> ใช้ท่าทางร่างกายเคลื่อนไหวประกอบการคิดเพื่อกระตุ้นพลังงานไหลเวียน",
+          "<strong>ทดลองลุยสนามสอบเสมือนจริง:</strong> ทำโจทย์ตัวอย่างจำลองความกดดันหรือจับเวลารันโปรแกรมทดสอบเพื่อสร้างสัญชาตญาณความคุ้นเคย"
+        ],
+        'M': [
+          "<strong>จัดลำดับความสำคัญของช่องสาร:</strong> หลีกเลี่ยงความพยายามทำทุกอย่างพร้อมกัน ให้เลือกใช้ทีละ 2ช่องทางหลัก เช่น มองภาพพร้อมกับจดโน้ตย่อ",
+          "<strong>เชื่อมโยงข้อมูลหลายรูปแบบ:</strong> ถ่ายภาพสไลด์มาประกอบกับเอกสารที่ขีดเขียนคำอธิบาย แล้วเล่าอภิปรายทบทวนให้ผู้อื่นฟัง",
+          "<strong>ใช้ความยืดหยุ่นให้เป็นประโยชน์:</strong> ปรับรูปแบบการรับข้อมูลตามชนิดวิชา เช่น ใช้ช่องภาพกับวิชาสถิติ และใช้ช่องลงมือทำกับวิชาคอมพิวเตอร์",
+          "<strong>ระวังการล้นเกินของข้อมูล (Information overload):</strong> คัดกรองและสลัดข้อมูลที่ไม่จำเป็นทิ้งเพื่อให้สมองจัดหมวดหมู่ระบบคิดได้รวดเร็วขึ้น"
+        ]
+      };
+
+      const kolbAdvices = {
+        'Diverger': [
+          "<strong>ระวังอาการผลัดวันประกันพรุ่งจากการคิดมากเกินไป:</strong> ตั้งเป้าหมายเล็กๆ แล้วลงมือทำภายใน 5 นาทีแรกโดยยังไม่ต้องรอข้อมูลสมบูรณ์แบบที่สุด",
+          "<strong>ต่อยอดจุดแข็งในการสร้างนวัตกรรม:</strong> ใช้ทักษะจินตนาการเป็นสะพานในการระดมสมองและระบุแนวทางการแก้ปัญหาที่สร้างสรรค์ในโปรเจกต์ทีม",
+          "<strong>ฝึกฝนการตัดสินใจเด็ดขาด:</strong> กำหนดกรอบจำกัดเวลาที่ชัดเจนในแต่ละขั้นตอนประเมิน เพื่อบังคับให้ตัวเองฟันธงเลือกตัวเลือกโดยไม่กังวล"
+        ],
+        'Assimilator': [
+          "<strong>ประยุกต์แผนงานสู่หน้างานจริง:</strong> ลองนำทฤษฎีที่ร่างไว้ในกระดาษมาทำตัวอย่างจำลองชิ้นเล็กๆ เพื่อทดสอบว่าใช้งานได้จริงตามธรรมชาติหรือไม่",
+          "<strong>พัฒนาทักษะความยืดหยุ่นในสังคม:</strong> เปิดรับฟังความคิดเห็นด้านความรู้สึกและทัศนคติส่วนตัวของสมาชิกทีม โดยมองว่าอารมณ์คือปัจจัยหนึ่งของผลงาน",
+          "<strong>ระวังการวิเคราะห์จนเป็นอัมพาต (Analysis Paralysis):</strong> ฝึกแก้ไขสถานการณ์ที่คลุมเครือซึ่งไม่มีคำตอบตายตัวในตำรา เพื่อเพิ่มภูมิคุ้มกันความล้มเหลว"
+        ],
+        'Converger': [
+          "<strong>เสริมความคิดสร้างสรรค์มุมกว้าง:</strong> ลองชวนทีมระดมสมองแบบเปิดกว้าง ปิดสวิตช์การวิจารณ์คำตอบผิด-ถูกไว้ก่อน เพื่อหาไอเดียที่กว้างขวางขึ้น",
+          "<strong>ใส่ใจประเด็นอารมณ์และจิตวิทยาความรู้สึก:</strong> ก่อนฟันธงเลือกทางออกที่มีประสิทธิภาพที่สุด ให้เช็คความพร้อมและแรงบันดาลใจของคนปฏิบัติงานด้วย",
+          "<strong>จัดสรรโปรเจกต์แก้ปัญหาเชิงโครงสร้าง:</strong> ใช้ศักยภาพแก้โจทย์ยากๆ เสนอตัวเป็นผู้สรุปทิศทางสำคัญและจัดระเบียบวิธีการใช้งานเครื่องมือให้กับทีม"
+        ],
+        'Accommodator': [
+          "<strong>ฝึกฝนเขียนแผนงานสั้นๆ 5 ขั้นตอน:</strong> คิดวิเคราะห์ล่วงหน้าเล็กน้อยก่อนลงมือลุยงานจริง เพื่ออุดรูรั่วของความผิดพลาดที่คาดการณ์ได้",
+          "<strong>เชื่อมต่อกับทฤษฎีและการสืบค้น:</strong> พยายามรับฟังข้อมูลวิถีสถิติและการอ้างอิงเชิงวิชาการเพื่อเสริมความน่าเชื่อถือให้กับวิธีการปฏิบัติงานของคุณ",
+          "<strong>ก้าวเป็นผู้บุกเบิกและแก้ปัญหาเฉพาะหน้า:</strong> นำความกล้าเสี่ยงและความยืดหยุ่นไปใช้กับการเริ่มต้นบุกเบิกตลาดหรือโครงการใหม่ๆ ที่ทีมอื่นไม่กล้าลุย"
+        ]
+      };
+
+      // Populate Techniques checklist
+      const techList = document.getElementById('adviceTechniquesList');
+      techList.innerHTML = '';
+      varkAdvices[varkStyle].forEach(adviceText => {
+        const li = document.createElement('li');
+        li.className = 'flex items-start space-x-3 py-1';
+        li.innerHTML = `
+          <span class="flex-shrink-0 text-green-500 font-bold">✓</span>
+          <span class="leading-relaxed text-slate-600 dark:text-slate-400 font-light text-[13.5px]">${adviceText}</span>
+        `;
+        techList.appendChild(li);
+      });
+
+      // Populate Skills checklist
+      const skillList = document.getElementById('adviceSkillsList');
+      skillList.innerHTML = '';
+      kolbAdvices[kolbStyle].forEach(adviceText => {
+        const li = document.createElement('li');
+        li.className = 'flex items-start space-x-3 py-1';
+        li.innerHTML = `
+          <span class="flex-shrink-0 text-indigo-500 font-bold">🚀</span>
+          <span class="leading-relaxed text-slate-600 dark:text-slate-400 font-light text-[13.5px]">${adviceText}</span>
+        `;
+        skillList.appendChild(li);
+      });
+    }
+
+    // 12. UTILITY: COPY RESULTS SUMMARY TO CLIPBOARD
+    function copyResults() {
+      // Calculate dominant scores to text
+      const vDom = document.getElementById('varkStyleName').innerText;
+      const kDom = document.getElementById('kolbStyleName').innerText;
+      
+      const shareText = `🧠 ผลการประเมินสไตล์การเรียนรู้ (CogniStyle Report) ของคุณ ${userName}
+-----------------------------------------------
+🎨 สไตล์การรับสารหลัก (VARK): ${vDom}
+🔄 สไตล์วงจรคิดประมวลผล (Kolb): ${kDom}
+
+อ่านรายงานแบบละเอียด เจาะลึกกระบวนการคิด วิธีการสื่อสาร และแผนพัฒนาตนเองเฉพาะบุคคลได้ในแอป CogniStyle ของคุณ!`;
+
+      navigator.clipboard.writeText(shareText).then(() => {
+        const btnText = document.getElementById('copyBtnText');
+        const icon = document.getElementById('copyIcon');
+        
+        btnText.innerText = "คัดลอกเรียบร้อยแล้ว!";
+        // Green success feedback state
+        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>`;
+        
+        setTimeout(() => {
+          btnText.innerText = "คัดลอกสรุปผลลัพธ์";
+          icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>`;
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+    }
+
+    // 13. RESET QUIZ
+    function resetQuiz(askConfirm = false) {
+      if (askConfirm) {
+        if (!confirm("คุณต้องการเริ่มแบบทดสอบใหม่หรือไม่? ข้อมูลคะแนนปัจจุบันจะหายไป")) {
+          return;
+        }
+      }
+      userAnswers = [];
+      currentQuestionIndex = 0;
+      showScreen('landingScreen');
+    }
+
+    // 14. FEEDBACK / BUG REPORT MODAL FUNCTIONS
+    function openFeedbackModal() {
+      const modal = document.getElementById('feedbackModal');
+      modal.classList.remove('hidden');
+      document.getElementById('feedbackMsg').value = '';
+      document.getElementById('feedbackEmail').value = '';
+    }
+
+    function closeFeedbackModal() {
+      const modal = document.getElementById('feedbackModal');
+      modal.classList.add('hidden');
+    }
+
+    function submitFeedback() {
+      const email = document.getElementById('feedbackEmail').value.trim();
+      const msg = document.getElementById('feedbackMsg').value.trim();
+      
+      if (!msg) {
+        alert("กรุณากรอกข้อความรายละเอียดข้อผิดพลาดก่อนส่งสัญญาณ");
+        return;
+      }
+      
+      // Simulate sending feedback
+      console.log("Feedback sent to developer:", { email, msg });
+      
+      alert("ส่งสัญญาณไปยังคุณ Dell Napatsakorn Klinfueang เรียบร้อยแล้ว! ขอบพระคุณสำหรับรายงานข้อผิดพลาดและข้อเสนอแนะ");
+      closeFeedbackModal();
+    }
+  </script>
+</body>
+</html>
