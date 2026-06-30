@@ -476,8 +476,29 @@
           <div id="optionsContainer" class="space-y-4">
             <!-- Dynamic list of options generated here -->
           </div>
+
+          <!-- Ranking Instruction Hint -->
+          <div class="text-xs text-slate-400 dark:text-slate-500 font-light mt-6 flex items-start space-x-1.5 leading-relaxed">
+            <span class="flex-shrink-0">💡</span>
+            <span>แตะตัวเลือกเรียงตามลำดับความชอบของคุณ (อันดับ 1, 2, 3...) โดยจัดอันดับอย่างน้อย 1 ตัวเลือกเพื่อกดข้อถัดไป</span>
+          </div>
+
+          <!-- Bottom Action Buttons inside Card -->
+          <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200/50 dark:border-slate-800/50">
+            <button onclick="clearCurrentRanks()" id="btnClearRanks" class="px-4 py-2 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 transition focus:outline-none">
+              ล้างลำดับที่เลือก
+            </button>
+            <button onclick="goToNextQuestion()" id="btnNext" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm rounded-xl shadow-md transition disabled:opacity-40 disabled:pointer-events-none flex items-center space-x-1.5 focus:outline-none">
+              <span id="btnNextText">ถัดไป</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
+
+
     </div>
 
     <!-- 3. PROCESSING SCREEN -->
@@ -516,6 +537,8 @@
           </style>
         </div>
       </div>
+
+
     </div>
 
     <!-- 4. RESULT SCREEN -->
@@ -564,6 +587,8 @@
           </div>
         </div>
       </div>
+
+
 
       <!-- Graphical Data Charts Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -670,6 +695,8 @@
         </div>
       </div>
 
+
+
       <!-- Actionable Advice & Development Plan -->
       <div class="glass-card p-6 md:p-8 rounded-3xl border shadow-lg print-card border-brand-500/20 dark:border-brand-400/10 space-y-6">
         <h3 class="text-xl font-bold bg-gradient-to-r from-brand-600 to-purple-600 dark:from-brand-400 dark:to-purple-400 bg-clip-text text-transparent border-b pb-3 border-slate-200 dark:border-slate-800">
@@ -701,10 +728,7 @@
         </div>
       </div>
 
-      <!-- Disclaimer Alert (Results) -->
-      <div class="text-center max-w-2xl mx-auto py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/30 dark:bg-slate-900/20 text-slate-400 dark:text-slate-500 text-[11px] leading-relaxed font-light print:border-none print:bg-transparent">
-        ⚠️ <strong>คำชี้แจง:</strong> รายงานฉบับนี้วิเคราะห์ผลลัพธ์จากข้อมูลสถานการณ์สมมติเบื้องต้นเพื่อใช้เป็นแนวทางพัฒนาการศึกษา ผลลัพธ์อาจมีข้อผิดพลาดได้ โปรดใช้วิจารณญาณในการประเมินความชอบและความถนัดที่แท้จริงของตนเอง
-      </div>
+
 
       <!-- Action buttons -->
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 no-print">
@@ -732,6 +756,13 @@
             <span>พิมพ์รายงาน / บันทึก PDF</span>
           </button>
         </div>
+      </div>
+
+
+
+      <!-- Disclaimer Alert (Results) -->
+      <div class="text-center max-w-2xl mx-auto py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/30 dark:bg-slate-900/20 text-slate-400 dark:text-slate-500 text-[11px] leading-relaxed font-light print:border-none print:bg-transparent">
+        ⚠️ <strong>คำชี้แจง:</strong> รายงานฉบับนี้วิเคราะห์ผลลัพธ์จากข้อมูลสถานการณ์สมมติเบื้องต้นเพื่อใช้เป็นแนวทางพัฒนาการศึกษา ผลลัพธ์อาจมีข้อผิดพลาดได้ โปรดใช้วิจารณญาณในการประเมินความชอบและความถนัดที่แท้จริงของตนเอง
       </div>
 
     </div>
@@ -790,318 +821,317 @@
   <!-- Application Logic (JavaScript) -->
   <script>
     // 1. DATABASE OF SCENARIO QUESTIONS
-    const quizQuestions = [
+                const quizQuestions = [
       {
         id: 1,
-        scenario: "เมื่อคุณซื้อเฟอร์นิเจอร์ชิ้นใหม่มา (เช่น ชั้นวางของอัจฉริยะแบบประกอบเอง) สิ่งแรกที่คุณจะเลือกทำเพื่อช่วยในการประกอบคือ...",
+        scenario: "คุณกำลังเรียนรู้วิธีการใช้งานเทคโนโลยีหรือแอปพลิเคชันตัวใหม่ในชีวิตประจำวัน (เช่น แอปมือถือตัวใหม่, โปรแกรมช่วยทำงาน หรือเครื่องใช้ไฟฟ้าอัจฉริยะ) คุณเลือกทำสิ่งใด?",
         options: [
           {
             letter: "ก",
-            text: "เปิดดูคลิปวิดีโออนิเมชัน 3D แนะนำวิธีประกอบใน YouTube เพื่อดูภาพตัวอย่างการวางชิ้นส่วนสีสันต่างๆ ก่อนลงมือประกอบจริง",
+            text: "สังเกตหน้าต่างอินเทอร์เฟซในแอป ดูคลิปวิดีโอแนะนำสั้นๆ หรือสังเกตรหัสสีสัญลักษณ์เพื่อจดจำตำแหน่งก่อนลงมือ",
             vark: "V",
             kolb: "RO",
-            desc: "ใช้การดูภาพและสังเกตเพื่อทำความเข้าใจ"
+            desc: "ทำความเข้าใจอินเทอร์เฟซและฟังก์ชันการใช้งานเชิงตำแหน่งจากรูปภาพและการสังเกต"
           },
           {
             letter: "ข",
-            text: "โทรศัพท์ถามขั้นตอนประกอบคร่าวๆ จากเพื่อนร่วมงาน หรือเปิดฟังคลิปรีวิวบรรยายการประกอบเพื่อให้จำสเต็ปได้ง่ายขึ้น",
+            text: "ทักแชทถามผู้รู้ คุยแลกเปลี่ยนความรู้สึก หรือเข้าไปตั้งกระทู้ถามในกลุ่มออนไลน์เกี่ยวกับเคล็ดลับส่วนบุคคล",
             vark: "A",
             kolb: "CE",
-            desc: "ใช้การฟังเสียงและแบ่งปันความรู้สึกแบบมีปฏิสัมพันธ์"
+            desc: "เรียนรู้ผ่านการรับฟังคำบอกเล่า การถามตอบที่มีชีวิตชีวา และทำความคุ้นเคยร่วมกับผู้อื่น"
           },
           {
             letter: "ค",
-            text: "กางคู่มือกระดาษที่มีแต่ตัวหนังสือคำอธิบายยาวๆ อ่านขั้นตอนและข้อควรระวังให้ครบถ้วนก่อน พร้อมขีดเช็คตามรายการชิ้นส่วนทีละข้อ",
+            text: "เปิดหาไฟล์เอกสารคู่มืออย่างเป็นระบบ (Documentation) หรือกางตารางข้อมูลวิเคราะห์เปรียบเทียบสเปกอักษรของทุกฟังก์ชัน",
             vark: "R",
             kolb: "AC",
-            desc: "ใช้ตรรกะ ตัวอักษรคู่มือ และคิดวิเคราะห์เชิงระบบ"
+            desc: "วิเคราะห์เงื่อนไข ข้อบังคับ คู่มือเขียนตัวหนังสือ และจัดเรียงความตรรกะเหตุผลล่วงหน้า"
           },
           {
             letter: "ง",
-            text: "แกะพลาสติกและนำชิ้นส่วนทั้งหมดออกมากองรวมกัน แล้วทดลองลุยเสียบสลักไม้ต่อชิ้นส่วนทันที ลองผิดลองถูกแล้วค่อยย้อนมาแก้หน้างาน",
+            text: "เปิดเครื่องเล่นทันที ลองจิ้มกดปุ่มไปเรื่อยๆ เพื่อลองผิดลองถูกและปรับตัวแก้ไขปัญหาเฉพาะหน้าด้วยการทำจริง",
             vark: "K",
             kolb: "AE",
-            desc: "ใช้สัมผัส ลงมือทำ และลุยปรับตัวจากการลองผิดลองถูก"
+            desc: "สร้างความจำกล้ามเนื้อสัมผัสหน้างาน ปรับแผนการใช้ทันควันจากการสังเกตการตอบสนองจริง"
           }
         ]
       },
       {
         id: 2,
-        scenario: "หากคุณต้องเตรียมตัวนำเสนองานสำคัญในที่ประชุมใหญ่วันพรุ่งนี้ คุณเลือกใช้วิธีใดในการฝึกซ้อม?",
+        scenario: "เมื่อคุณได้รับมอบหมายให้นำเสนอข้อมูลหรือไอเดียสำคัญต่อกลุ่มคนจำนวนมาก (เช่น การทำพรีเซนต์กลุ่มในวิชาเรียน หรือการนำเสนอโปรเจกต์ในบริษัท) คุณวางแผนการทำงานอย่างไร?",
         options: [
           {
             letter: "ก",
-            text: "จัดทำแผนภูมิการไหลของเนื้อหา (Flowchart) หรือสร้างสไลด์นำเสนอที่ใช้การแบ่งรหัสสีและไอคอนสัญลักษณ์ เพื่อกวาดสายตาจดจำโครงสร้างสเต็ป",
+            text: "จัดเรียงสไลด์โดยเน้นการใช้แผนผัง ลำดับสีสันสะดุดตา วาดไอคอนหรือไดอะแกรมเพื่อช่วยให้ผู้ฟังมองเห็นมิติความสัมพันธ์",
             vark: "V",
             kolb: "RO",
-            desc: "เน้นจำตำแหน่งภาพกราฟฟิกและการเชื่อมโยงด้วยตาเปล่า"
+            desc: "สื่อสารด้วยความสวยงาม แผนภาพนำทางสายตา และสะกดผู้ฟังด้วยมิติเชิงพื้นที่ของสัญลักษณ์"
           },
           {
             letter: "ข",
-            text: "ซ้อมพูดอธิบายเสียงดังๆ ในห้อง หรืออัดเสียงพูดของตัวเองแล้วเปิดฟังซ้ำเพื่อตรวจสอบโทนเสียง จังหวะ และการเว้นช่วงการเล่าเรื่อง",
+            text: "เน้นการเรียบเรียงน้ำเสียง จังหวะจะโคนในการพูดเล่าเรื่องสด และเปิดการพูดคุยถกเถียงอย่างเป็นมิตรกับผู้ฟัง",
             vark: "A",
             kolb: "CE",
-            desc: "เน้นเสียงพูด ฟังการออกเสียง และการปรึกษาสัมผัสพลังงานบุคคล"
+            desc: "ใช้สุนทรียภาพแห่งคำพูด สื่อสารความรู้สึกจากหัวใจ และรับฟังเสียงสะท้อนคำถามแบบเปิดใจ"
           },
           {
             letter: "ค",
-            text: "เขียนสคริปต์คำพูดร่างลงบนกระดาษแบบละเอียดคำต่อคำ จัดย่อหน้าข้อมูลอย่างเป็นระเบียบ และอ่านทบทวนรายงานสถิติตัวเลขเชิงลึก",
+            text: "จัดทำคู่มือข้อมูลสรุปแจกเป็นข้อๆ (Handouts) ที่ระบุข้อมูลสถิติตัวเลขอ้างอิงและทฤษฎีสนับสนุนเชิงระบบอย่างแน่นหนา",
             vark: "R",
             kolb: "AC",
-            desc: "เน้นวิเคราะห์คำเขียน การเรียงตรรกะประโยคที่เป็นทางการ"
+            desc: "เน้นความถูกต้องของข้อมูลทางการ คำจำกัดความ และหลักเหตุผลทฤษฎีที่เป็นตัวอักษรชัดเจน"
           },
           {
             letter: "ง",
-            text: "ซ้อมเดินนำเสนอไปมารอบห้อง ใช้ท่าทางมือประกอบการอธิบาย และกดทดลองใช้อุปกรณ์จริงเพื่อจำลองความรู้สึกและน้ำหนักการทำงานจริง",
+            text: "จัดทำชิ้นงานตัวอย่างมาสาธิตหน้าเวที หรือเตรียมกิจกรรมทดลองปฏิบัติจริงสั้นๆ ให้ผู้ฟังมีส่วนร่วมขยับร่างกาย",
             vark: "K",
             kolb: "AE",
-            desc: "ใช้การขยับร่างกาย จำลองการเคลื่อนไหวเพื่อซ้อมเสมือนจริง"
+            desc: "ใช้การสาธิตเชิงรูปธรรม นำความรู้เข้าสู่การปฏิบัติจริง และกระตุ้นการขยับท่าทางผู้ร่วมกิจกรรม"
           }
         ]
       },
       {
         id: 3,
-        scenario: "เมื่อคุณต้องการหัดใช้โปรแกรมคอมพิวเตอร์หรือแอปพลิเคชันมือถือตัวใหม่ที่มีฟังก์ชันการทำงานค่อนข้างซับซ้อน คุณทำอย่างไร?",
+        scenario: "หากเกิดปัญหาทางเทคนิคเฉพาะหน้าขัดข้องกะทันหันในขณะที่คุณกำลังทำงานสำคัญ (เช่น คอมพิวเตอร์ค้างก่อนส่งงานไม่กี่นาที หรือระบบจัดงานมีปัญหาขณะกำลังเริ่มกิจกรรม) สิ่งแรกที่คุณทำคืออะไร?",
         options: [
           {
             letter: "ก",
-            text: "เปิดดูคลิปวิดีโอสอนใช้งานสั้นๆ (Tutorial) หรือดูรูปภาพประกอบจับภาพหน้าจอ (Screenshots) ที่มีลูกศรชี้บอกการทำงานของแต่ละเมนู",
+            text: "หยุดนิ่งสังเกตอาการความเสียหายรอบตัว กวาดสายตามองหารหัสสีแจ้งเตือน หรือมองโครงสร้างแผนภูมิระบบเพื่อหาจุดเสีย",
             vark: "V",
             kolb: "RO",
-            desc: "จำโครงสร้างและการวางเลย์เอาต์หน้าต่างเครื่องมือจากวิดีโอ"
+            desc: "ใช้สายตาสังเกตอาการทางกายภาพอย่างรอบคอบ เพื่อวิเคราะห์เชิงตำแหน่งของการชำรุดล่วงหน้า"
           },
           {
             letter: "ข",
-            text: "ชวนเพื่อนหรือเพื่อนร่วมงานที่ชำนาญมานั่งคุยสอนวิธีการใช้ หรือเข้าไปพิมพ์ถามข้อสงสัยในกลุ่มฟอรัมเพื่อแลกเปลี่ยนเทคนิคกัน",
+            text: "โทรหาผู้ชำนาญเพื่อขอรับฟังวิเคราะห์ปัญหา เล่าอาการของเสียงขัดข้อง และประเมินอารมณ์ความรู้สึกของผู้เกี่ยวข้องด่วน",
             vark: "A",
             kolb: "CE",
-            desc: "จับอารมณ์ คุยเสียงเพื่อเรียนรู้เคล็ดลับเฉพาะจากคำพูด"
+            desc: "แก้ไขผ่านการปรึกษาช่วยเหลือด้วยเสียงพูด บรรเทาความตื่นตระหนก และประสานงานมนุษยสัมพันธ์"
           },
           {
             letter: "ค",
-            text: "เปิดอ่านเอกสารคู่มือสอนใช้งานออนไลน์ (Documentation) หรือดาวน์โหลดไฟล์ PDF ข้อมูลความสัมพันธ์ของคำสั่งอย่างเป็นระบบ",
+            text: "ค้นหาคู่มือวิธีการแก้ไขข้อบกพร่องตามมาตรฐาน (Troubleshooting Guide) หรือตรวจสอบนิยามตรรกะระบบแบบเป็นขั้นเป็นตอน",
             vark: "R",
             kolb: "AC",
-            desc: "ศึกษาเชิงลึกจากบทความวิชาการเชิงคู่มือและข้อกำหนดโครงสร้าง"
+            desc: "อ้างอิงคู่มือมาตรฐาน ข้อกำหนดตัวหนังสือ และประมวลปัญหาตามลำดับโครงสร้างเชิงเหตุผล"
           },
           {
             letter: "ง",
-            text: "เปิดแอปพลิเคชันขึ้นมาแล้วทดลองเอานิ้วจิ้มกดปุ่มเล่นดูทุกปุ่มทันที เรียนรู้วิธีการใช้ผ่านการทดลองทำและสังเกตผลลัพธ์จริง",
+            text: "ลงมือทดสอบถอดปลั๊ก รีสตาร์ท ขยับตัวสายต่อ หรือรันโค้ดเช็คหน้างานทันทีเพื่อดูผลลัพธ์การตอบสนองจริงวินาทีต่อวินาที",
             vark: "K",
             kolb: "AE",
-            desc: "เน้นพฤติกรรมกล้าลองเสี่ยง ประยุกต์วิเคราะห์ผลตอบรับแบบเรียลไทม์"
+            desc: "ลุยปฏิบัติหน้างาน แก้ปัญหาด้วยการกระทำตรง และปรับแผนหน้างานอย่างคล่องตัวไร้ความลังเล"
           }
         ]
       },
       {
         id: 4,
-        scenario: "คุณกำลังวางแผนเดินทางไปท่องเที่ยวในเมืองหลวงของต่างประเทศที่คุณไม่เคยไปมาก่อนเลย คุณวางแผนทริปนี้อย่างไร?",
+        scenario: "ในสัปดาห์ที่คุณมีภารกิจล้นมือและต้องบริหารจัดการงานหลากหลายในเวลาเดียวกัน (เช่น นักเรียนที่ต้องอ่านหนังสือสอบหลายวิชา หรือวัยทำงานที่ต้องประสานโปรเจกต์หลายตัวพร้อมกัน) คุณจัดการอย่างไร?",
         options: [
           {
             letter: "ก",
-            text: "เปิด Google Maps ปักหมุดสีแยกประเภทสถานที่ (โรงแรม/ร้านอาหาร/จุดเที่ยว) และคัดภาพสวยๆ จาก Instagram เพื่อวางแผนจุดถ่ายรูป",
+            text: "สร้างแผนภาพบอร์ดรหัสสี (Color-coded calendar) หรือปักหมุดสีตามความเร่งด่วนเพื่อจัดลำดับภารกิจบนบอร์ดภาพให้ชัดเจน",
             vark: "V",
             kolb: "RO",
-            desc: "จดจำตำแหน่งในเชิงภูมิศาสตร์และความงามผ่านภาพสี"
+            desc: "จำลองภาพรวมงานทั้งหมดเป็นภาพพิกัดสีเพื่อหลีกเลี่ยงการหลงลืมเชิงทัศน์"
           },
           {
             letter: "ข",
-            text: "นั่งฟังพอดแคสต์ (Podcasts) รีวิวการท่องเที่ยวเมืองนี้ หรือทักแชทไปสอบถามขอฟังประสบการณ์ตรงจากคนรู้จักที่เคยไปมาแล้ว",
+            text: "พูดคุยสะท้อนความเครียดกับคนในทีมหรือครอบครัว คอยรับฟังจังหวะคำแนะนำ และร่วมแบ่งหน้าที่การทำงานเพื่อแบ่งเบา",
             vark: "A",
             kolb: "CE",
-            desc: "จำข้อมูลจากเรื่องเล่า บรรยากาศทางความรู้สึก และเสียงพูด"
+            desc: "ใช้การสนับสนุนทางอารมณ์ พูดคุยกระตุ้นพลังงาน และประสานการช่วยเหลือน้ำใจกลุ่ม"
           },
           {
             letter: "ค",
-            text: "อ่านบล็อกรีวิวเชิงลึกที่มีตารางแจกแจงค่าใช้จ่าย ค้นหาราคาตั๋วรถไฟ และเส้นทางรถประจำทางพร้อมจดเวลาเปิด-ปิดอย่างละเอียด",
+            text: "เขียนเป้าหมายงานเรียงลำดับ 1-2-3 ลงในบันทึกตารางเวลา มีเงื่อนไขการส่งและข้อสรุปตัวหนังสืออย่างเป็นระเบียบ",
             vark: "R",
             kolb: "AC",
-            desc: "มีระเบียบการเขียนแผน และตรวจสอบเงื่อนไขความถูกต้องผ่านการค้นคว้า"
+            desc: "ใช้การจดสรุปเป็นข้อๆ ยึดโยงกรอบโครงสร้างตรรกะเวลา และเรียงลำดับเป้าหมายอักษรชัดเจน"
           },
           {
             letter: "ง",
-            text: "จองเพียงแค่ตั๋วและโรงแรมหลัก แล้วไปเดินเท้าเดินทัวร์ลุยสำรวจจริงตามซอกซอย ลองชิมอาหารสตรีทฟู้ด และปรับทริปตามความรู้สึกหน้างาน",
+            text: "เริ่มลงมือลุยทำงานชิ้นที่ง่ายที่สุดหรืออยู่ใกล้ตัวที่สุดทันที เพื่อให้ร่างกายเริ่มขยับและเห็นความคืบหน้าของงานจริง",
             vark: "K",
             kolb: "AE",
-            desc: "เปิดรับสัมผัส ความตื่นเต้น และการทดลองใช้ชีวิตสดๆ ตามสัญชาตญาณ"
+            desc: "ก้าวข้ามอาการลังเลด้วยการลงมือทำจริง และเรียนรู้ปรับแต่งลำดับงานตามความเคยชินหน้างาน"
           }
         ]
       },
       {
         id: 5,
-        scenario: "เมื่อระบบงาน โครงการ หรือกิจกรรมที่คุณเป็นผู้รับผิดชอบเกิดปัญหาขัดข้องกะทันหัน คุณหาสาเหตุอย่างไร?",
+        scenario: "เมื่อต้องเริ่มดำเนินงานร่วมกับผู้อื่นในกิจกรรมกลุ่ม (เช่น การทำรายงานวิชาการร่วมกับเพื่อนร่วมชั้น หรือการประชุมสร้างไอเดียผลิตภัณฑ์ใหม่ในบริษัท) บทบาทของคุณคืออะไร?",
         options: [
           {
             letter: "ก",
-            text: "วาดแผนภูมิความสัมพันธ์ (Flowchart) หรือเขียนไดอะแกรมแผนภาพก้างปลาลงในกระดาษ เพื่อให้เห็นภาพรวมของจุดเชื่อมโยงปัญหามุมกว้าง",
+            text: "นั่งเงียบสังเกตแชร์ทิศทางความคิด แล้ววาดแผนผัง Mind Map ลากเส้นเชื่อมโยงความคิดของทุกคนบนกระดานแชร์กัน",
             vark: "V",
             kolb: "RO",
-            desc: "ใช้การมองภาพเหตุและผลเชิงพิกัด"
+            desc: "วิเคราะห์ภาพรวมการแชร์ความคิดผ่านการสังเกตเชิงลึก และสรุปเปรียบเทียบเป็นโมเดลภาพ"
           },
           {
             letter: "ข",
-            text: "โทรศัพท์ชวนทีมประชุมด่วน เล่าอาการของปัญหาให้ทุกคนฟังเพื่อออกเสียงระดมความคิดเห็น และฟังเสียงสะท้อนคำแนะนำการแก้ไข",
+            text: "พูดแชร์ไอเดียสดๆ ออกเสียงอภิปราย และคอยสังเกตความพึงพอใจและความรู้สึกร่วมของสมาชิกแต่ละคน",
             vark: "A",
             kolb: "CE",
-            desc: "เรียนรู้พฤติกรรมผ่านปฏิสัมพันธ์ มนุษยสัมพันธ์ และความต้องการส่วนร่วม"
+            desc: "ใช้ทักษะความฉลาดทางอารมณ์ ปลุกพลังผ่านบทสนทนา และยึดเหนี่ยวความรู้สึกร่วมในทีม"
           },
           {
             letter: "ค",
-            text: "เปิดอ่านรายงานบันทึกประวัติการทำงาน (Logs) กางตารางเปรียบเทียบค่าความผิดปกติ และค้นหาวิธีแก้จากคู่มือมาตรฐานอ้างอิง",
+            text: "ค้นคว้าข้อมูลทฤษฎี ข้อเท็จจริงที่เขียนเป็นวิจัยเป็นทางการ และรวบรวมเหตุผลมาเปรียบเทียบในตารางข้อมูลวิเคราะห์",
             vark: "R",
             kolb: "AC",
-            desc: "ใช้การตรวจสอบนิยาม แนวคิดทฤษฎี และเอกสารวิเคราะห์อย่างละเอียด"
+            desc: "เคารพข้อมูลอ้างอิงเชิงวิชาการ รายงานตัวหนังสือ และวางระบบข้อดีข้อเสียอย่างเป็นเหตุเป็นผล"
           },
           {
             letter: "ง",
-            text: "ลงมือถอดปลั๊ก รันโปรแกรมใหม่ หรือปรับเปลี่ยนตัวแปรในระบบที่ละส่วนทันทีเพื่อทดสอบผลลัพธ์แบบเรียลไทม์ว่ามีจุดใดตอบสนองดีขึ้น",
+            text: "อาสาลงมือสร้างแบบจำลองต้นแบบสั้น (Mockup/Prototype) ขีดเขียนวาดรูปร่างเพื่อทดสอบการตอบสนองจริงของผู้ใช้งาน",
             vark: "K",
             kolb: "AE",
-            desc: "เรียนรู้ผ่านการทดลองหน้างานจริง ปรับการทำงานโดยไม่ลังเล"
+            desc: "ประยุกต์ทฤษฎีเข้าหาการทำชิ้นงานจับต้องได้ และทดสอบความคล่องตัวเชิงพฤติกรรมจริง"
           }
         ]
       },
       {
         id: 6,
-        scenario: "หากคุณต้องการเริ่มต้นฝึกเรียนรู้งานอดิเรกใหม่ๆ (เช่น การจัดตกแต่งจานอาหารระดับพรีเมียม หรือการฝึกเล่นกีตาร์)",
+        scenario: "หากคุณต้องการเริ่มต้นฝึกฝนทักษะพิเศษส่วนตัวชิ้นใหม่ในยามว่าง (เช่น การฝึกภาษาต่างประเทศเพิ่มเติม หรือฝึกเล่นเครื่องดนตรี/กีฬา)",
         options: [
           {
             letter: "ก",
-            text: "เปิดคลิปวิดีโอสาธิตการทำของเชฟหรือผู้เชี่ยวชาญ คอยสังเกตเทคนิคการเคลื่อนไหว การจัดวางองค์ประกอบจาน และสีสันอย่างใกล้ชิด",
+            text: "ดูวิดีโออนิเมชันขั้นตอนการทำงานของกล้ามเนื้อ/การวางนิ้ว ดูภาพแผนผังตำแหน่งและรหัสสีโครงสร้างเพื่อจำแนวภาพ",
             vark: "V",
             kolb: "RO",
-            desc: "สร้างภาพจินตนาการทางตา สังเกตทิศทางและมิติความตื้นลึก"
+            desc: "สร้างภาพสมองเชิงลึก สังเกตทิศทางตำแหน่งการขยับ และจำพิกัดเชิงสายตา"
           },
           {
             letter: "ข",
-            text: "เปิดไฟล์เสียงอภิปราย ฟังคำอธิบายเรื่องจังหวะ โทนเสียง และเปรียบเทียบเสียงที่เล่นออกมาเพื่อประเมินความถูกต้องของทำนองดนตรี",
+            text: "ฟังไฟล์เสียงสำเนียง/จังหวะเสียงซ้ำๆ และซ้อมคุยสดโต้ตอบกับเพื่อนหรือเจ้าของภาษาเพื่อสัมผัสจังหวะธรรมชาติ",
             vark: "A",
             kolb: "CE",
-            desc: "ใช้สุนทรียภาพทางเสียง การสื่อสารในหัวใจ และการแนะแนวด้วยวาจา"
+            desc: "ใช้สัญชาตญาณความคุ้นเคยทางโสต การฟังจับระดับน้ำเสียง และกระตุ้นความรู้สึกสัมผัสโดยตรง"
           },
           {
             letter: "ค",
-            text: "ซื้อตำราอาหาร หรือกางแผ่นโน้ตดนตรีมาตรฐานมาอ่านเพื่อวิเคราะห์ความหมายของเครื่องหมายดนตรีและทฤษฎีระบบอาหารก่อนลงมือซ้อม",
+            text: "อ่านตำราไวยากรณ์อย่างเป็นทางการ ศึกษาตารางตัวโน้ตเพลง/คอร์ดดนตรีมาตรฐาน และจดจำกฎเกณฑ์กติกาอย่างเป็นระบบ",
             vark: "R",
             kolb: "AC",
-            desc: "เคารพคู่มือเขียน โน้ตเพลง ลำดับขั้นอันสมบูรณ์แบบเชิงวิทยาศาสตร์"
+            desc: "เคารพกฎเกณฑ์ไวยากรณ์ ตารางความรู้ ข้อสรุปหนังสือ และเรียนรู้จากทฤษฎีเชิงประจักษ์ล่วงหน้า"
           },
           {
             letter: "ง",
-            text: "หยิบวัตถุดิบครัวมาปรุง หรือลองดีดกีตาร์ทันที ค่อยใช้ความรู้สึกสัมผัสปลายนิ้วและชิมรสชาติเพื่อปรับเปลี่ยนความเหมาะสมสดๆ หน้างาน",
+            text: "หยิบจับเครื่องดนตรี/ลงสนามทดลองขยับร่างกายทันที และใช้ความรู้สึกทางกายภาพแก้ไขข้อบกพร่องตามจริงขณะซ้อม",
             vark: "K",
             kolb: "AE",
-            desc: "จำลองประสบการณ์จริงจากการสัมผัส คลุกคลี และการตอบสนองผ่านร่างกาย"
+            desc: "เรียนรู้ผ่านการสัมผัสจริงหน้างาน การขยับกล้ามเนื้อ (Muscle Memory) และกล้าเสี่ยงทดสอบความสามารถจริง"
           }
         ]
       },
       {
         id: 7,
-        scenario: "เมื่อเพื่อนสนิทชวนคุณไปเล่นบอร์ดเกมแนววางแผนกลยุทธ์เกมใหม่ที่คุณไม่เคยเล่นมาก่อนเลย สิ่งแรกที่คุณต้องการทำเพื่อเรียนรู้กฎกติกาการเล่นของเกมนี้คืออะไร?",
+        scenario: "เมื่อคุณจำเป็นต้องตัดสินใจเลือกเส้นทางอนาคตที่สำคัญ (เช่น การเลือกแผนการเรียน/คณะเข้ามหาวิทยาลัย หรือการย้ายแผนก/เปลี่ยนสายอาชีพทำงานใหม่)",
         options: [
           {
             letter: "ก",
-            text: "เปิดดูคลิปวิดีโออนิเมชันสรุปวิธีเล่นด่วนย่อๆ หรือดูภาพการ์ตูนอินโฟกราฟิกเซ็ตอัพบอร์ดเพื่อดูสัญลักษณ์และการจัดวางอุปกรณ์",
+            text: "รวบรวมแผนภูมิเปรียบเทียบแนวโน้มโอกาสเติบโต แผนภาพภาพรวมโครงสร้างสายอาชีพ (Career Path) และรูปถ่ายสถานที่จริง",
             vark: "V",
             kolb: "RO",
-            desc: "ทำความเข้าใจกฎกติกาเบื้องต้นผ่านภาพเคลื่อนไหวและแผนผังสีสัน"
+            desc: "ใช้การตัดสินใจจากการเห็นแผนผังเส้นทางและบรรยากาศรูปภาพองค์รวม"
           },
           {
             letter: "ข",
-            text: "ให้เพื่อนที่เป็นเจ้าของเกมนั่งเล่าอธิบายกติกาให้ฟัง และร่วมจับกลุ่มพูดคุยแลกเปลี่ยนแนวทางการเอาชนะกันในกลุ่มอย่างสนุกสนาน",
+            text: "นัดกินข้าวพูดคุยกับรุ่นพี่ในสายงานเพื่อฟังเล่าประสบการณ์ตรง คุยเรื่องสภาพจิตใจ และความสุขทางความรู้สึกในการใช้ชีวิตจริง",
             vark: "A",
             kolb: "CE",
-            desc: "รับรู้กติกาผ่านการฟังคำอธิบาย การซักถามถกเถียง และสัมผัสความรู้สึกเป็นกลุ่ม"
+            desc: "ตัดสินใจจากประสบการณ์ตรงส่วนบุคคล ความพึงพอใจเชิงอารมณ์ และบทสนทนาแบบเปิดใจ"
           },
           {
             letter: "ค",
-            text: "กางสมุดคู่มือกฎกติกาภาษาไทยฉบับเต็ม (Rulebook) อ่านรายละเอียดข้อจำกัดของการเดินและการนับคะแนนอย่างเป็นระบบทีละหน้าจนเข้าใจ",
+            text: "เจาะลึกตารางโครงสร้างหลักสูตรหรือฐานข้อมูลเงินเดือนเฉลี่ย ค้นคว้าสถิติความต้องการตลาดระยะยาวผ่านรายงานตัวหนังสือ",
             vark: "R",
             kolb: "AC",
-            desc: "ศึกษาคู่มือภาษาเขียน การแบ่งลำดับแต้ม และจัดวางความเข้าใจเชิงโครงสร้าง"
+            desc: "วิเคราะห์ข้อมูลเอกสารสถิติตัวเลข ตารางเปรียบเทียบที่เป็นลายลักษณ์อักษรอย่างรอบคอบมีเหตุผล"
           },
           {
             letter: "ง",
-            text: "ขอนำอุปกรณ์ออกมาวางบนโต๊ะ แจกการ์ดให้ทุกคน แล้วเริ่มทดลองเล่นรอบสาธิต (Mock Round) ทันทีเพื่อปรับทักษะความคุ้นเคยสดๆ หน้างาน",
+            text: "ไปสมัครทดลองฝึกงานระยะสั้น (Internship) ทำพาร์ทไทม์ หรือทำมินิโปรเจกต์จำลองเพื่อลองสวมบทบาทจริงหน้างานดูก่อน",
             vark: "K",
             kolb: "AE",
-            desc: "ลุยเล่นจริงตาทดลอง เรียนรู้วิธีเดินการ์ดผ่านการลงมือสัมผัสและปรับตัวตามรอบ"
+            desc: "ใช้สัญชาตญาณจากการทดลองอยู่หน้างานจริง สัมผัสความกดดัน และการลงมือปฏิบัติเพื่อจับความรู้สึกว่าใช่หรือไม่"
           }
         ]
       },
       {
         id: 8,
-        scenario: "คุณกำลังพิจารณาจะซื้อสมาร์ทโฟนระดับเรือธงเครื่องใหม่ที่มีราคาสูง คุณใช้วิธีใดในการเปรียบเทียบข้อมูลก่อนการตัดสินใจซื้อ?",
+        scenario: "คุณกำลังเรียนรู้และผ่อนคลายกับงานอดิเรกโปรด (เช่น การทดลองหัดเล่นบอร์ดเกมกลยุทธ์ชุดใหม่ หรือการฝึกทำอาหารจานเด็ดตามสูตรออนไลน์)",
         options: [
           {
             letter: "ก",
-            text: "ดูคลิปวิดีโอรีวิวการทดสอบกล้อง แกะกล่องสินค้า หรือเปิดดูแกลเลอรีรูปภาพเปรียบเทียบโทนสีและขนาดมิติตัวเครื่อง",
+            text: "เปิดวิดีโออนิเมชันสรุปวิธีเล่นด่วน หรือดูแผนภาพกราฟิกสรุปขั้นตอน/การจัดวางเครื่องปรุงอุปกรณ์ให้เห็นตำแหน่งการจัดสรร",
             vark: "V",
             kolb: "RO",
-            desc: "สังเกตความคุ้มค่าและความเป็นไปได้ผ่านการเปรียบเทียบเชิงทัศน์"
+            desc: "ทำความเข้าใจภาพรวมการประกอบสัดส่วนเชิงสายตาและพิกัดการจัดวาง"
           },
           {
             letter: "ข",
-            text: "ฟังพอดแคสต์จัดอันดับความรู้สึกของบล็อกเกอร์ หรือโทรศัพท์ไปพูดคุยถามความเห็นจากเพื่อนสนิทที่ใช้รุ่นนั้นอยู่ก่อนแล้ว",
+            text: "ให้คนรอบข้างสอนและชวนนั่งคุยขั้นตอน แลกเปลี่ยนเคล็ดลับและจังหวะของรสชาติจากความรู้สึกแบบเรียลไทม์",
             vark: "A",
             kolb: "CE",
-            desc: "ใช้ข้อมูลคำพูด ประสบการณ์จริง และเสียงสะท้อนความรู้สึกประทับใจ"
+            desc: "รับฟังเคล็ดลับส่วนบุคคลผ่านการเล่าปากเปล่า การชิมสะท้อนผลลัพธ์ และสร้างการมีส่วนร่วมในครัว/บอร์ดเกม"
           },
           {
             letter: "ค",
-            text: "กางตารางสเปกทางเทคนิคเพื่อวิเคราะห์ประสิทธิภาพหน่วยประมวลผล เปรียบเทียบตัวเลข Benchmark และราคาแต่ละโปรโมชัน",
+            text: "นั่งอ่านเอกสารสมุดกฎกติกาวิธีเล่นอย่างเป็นระบบ (Rulebook) หรือตำราสัดส่วนการชั่งตวงปริมาณส่วนผสมเป็นตัวอักษร",
             vark: "R",
             kolb: "AC",
-            desc: "ประเมินโดยใช้หลักตรรกะ เหตุผลเชิงตัวเลข และข้อสรุปเอกสารทางการ"
+            desc: "เรียนรู้จากทฤษฎีมาตรฐานกติกา ตารางน้ำหนัก หนังสืออธิบายเชิงลึก และคิดเชื่อมโยงความคุ้มค่า"
           },
           {
             letter: "ง",
-            text: "เดินทางไปที่ศูนย์บริการหรือร้านค้า เพื่อหยิบจับ ทดลองกวาดหน้าจอ เล่นแอปพลิเคชัน และทดสอบถือในมือจริงเพื่อเช็คน้ำหนัก",
+            text: "กางการ์ดบอร์ดเกมลุยเล่นตาทดลอง (Mock Round) หรือเปิดเตาลุยชั่งตวงหยิบจับวัตถุดิบลงกะทะชิมปรุงแต่งรสชาติจริงหน้างาน",
             vark: "K",
             kolb: "AE",
-            desc: "ใช้สัมผัสจริง ตรวจสอบการใช้งานแบบเรียลไทม์ และตัดสินใจตามความรู้สึกหน้างาน"
+            desc: "ลงมือทำตรงทันที เรียนรู้การเดินบอร์ดเกมหรือสูตรอาหารผ่านการกระทำและลิ้มรสสัมผัสจริง"
           }
         ]
       },
       {
         id: 9,
-        scenario: "คุณกำลังเข้าร่วมเวิร์กชอปสร้างสรรค์ผลงานหรือเรียนรู้ทักษะใหม่ (เช่น เวิร์กชอปการออกแบบกราฟิก หรือการเขียนโค้ดเริ่มต้น) คุณเรียนรู้ได้ดีที่สุดอย่างไร?",
+        scenario: "เมื่อคุณได้รับผลคะแนนประเมินการทำงาน หรือรับทราบผลการเรียน/คะแนนสอบที่ไม่เป็นไปตามความคาดหวัง คุณมีปฏิกิริยาอย่างไร?",
         options: [
           {
             letter: "ก",
-            text: "สังเกตหน้าจอของวิทยากรที่สาธิตขั้นตอนให้ดู หรือดูแผนภาพอินโฟกราฟิกแสดงโครงสร้างการจัดวางองค์ประกอบต่างๆ",
+            text: "ตรวจดูแผนผังชาร์ตกราฟิกแยกจุดแข็งจุดอ่อนเทียบกับระดับคะแนนเฉลี่ยกลุ่ม หรือสังเกตจุดรหัสสีไฮไลท์ความผิดพลาด",
             vark: "V",
             kolb: "RO",
-            desc: "เรียนรู้โดยการจำตำแหน่ง โครงร่างสี และความสัมพันธ์เชิงรูปภาพ"
+            desc: "สังเกตความผิดพลาดเชิงพิกัดสายตา ตระหนักปัญหาจากแผนภูมิกราฟิกวิเคราะห์เปรียบเทียบ"
           },
           {
             letter: "ข",
-            text: "ฟังวิทยากรอธิบายหลักการสดๆ และจับกลุ่มพูดคุยแลกเปลี่ยนปัญหาการทำงานกับเพื่อนๆ ร่วมชั้นที่นั่งโต๊ะข้างกัน",
+            text: "ขอนัดพบปะอธิบายพูดคุยแบบเป็นส่วนตัวกับอาจารย์/หัวหน้าทีม เพื่อแชร์ปัญหาสภาพจิตใจ และรับฟังคำติชมสะท้อนความคิด",
             vark: "A",
             kolb: "CE",
-            desc: "รับรู้ผ่านการฟังคำอธิบาย การแลกเปลี่ยนด้วยวาจา และสัมผัสความรู้สึกกลุ่ม"
+            desc: "แก้ไขจุดบกพร่องผ่านปฏิสัมพันธ์ช่วยเหลือกัน เปิดใจรับฟังเสียงอธิบาย และทบทวนความรู้สึกของตนเอง"
           },
           {
             letter: "ค",
-            text: "อ่านเอกสารประกอบการบรรยาย (Handouts) ที่แจกให้ จดสูตร หรือโค้ดตัวอย่างลงสมุดโน้ตอย่างเป็นระเบียบตามลำดับ",
+            text: "อ่านความเห็นข้อเขียนประเมิน (Written comments) ในเอกสารอย่างละเอียดทีละข้อ พร้อมจดบันทึกแผนงานปรับปรุงเป็นข้อๆ",
             vark: "R",
             kolb: "AC",
-            desc: "สร้างระบบการจดจำจากเอกสารอักษร ลำดับตรรกะ และวิเคราะห์แนวคิด"
+            desc: "วิเคราะห์เชิงลึกจากรายงานตัวหนังสือ วางโครงสร้างแผนแก้ไขเชิงตรรกะเหตุผล และเปรียบเทียบเป้าหมายการเขียน"
           },
           {
             letter: "ง",
-            text: "พิมพ์โค้ดตามจริงทันทีลงในเครื่อง หรือจัดองค์ประกอบภาพในซอฟต์แวร์ด้วยตนเอง เพื่อหาวิธีแก้ไขจุดผิดพลาดหน้างาน",
+            text: "ขอแบบฝึกหัดทบทวนแก้ไขใหม่มาลงมือซ้อมทำทันที หรืออาสาขอแก้ตัวในมินิโปรเจกต์ถัดไปเพื่อลงมือซ่อมแซมผลงาน",
             vark: "K",
             kolb: "AE",
-            desc: "ทดลองทำ ปรับปรุงจุดบกพร่องตามจริงทันควัน และจำผ่านกล้ามเนื้อมือสัมผัส"
+            desc: "เรียนรู้แก้ไขปัญหาอย่างรวดเร็วผ่านประสบการณ์ฝึกซ้อมรอบใหม่ เปลี่ยนพฤติกรรมจากการลงมือซ่อมงานตัวจริงทันที"
           }
         ]
       }
     ];
-
     // 2. STATE MANAGEMENT VARIABLES
     let currentQuestionIndex = 0;
-    let userAnswers = []; // Stores the selected option indexes
+    let userAnswers = []; // Stores arrays of ranked option indexes per question: e.g. [2, 0, 1]
     let userName = "";
 
     // 3. ON LAUNCH LOAD SETTINGS
@@ -1197,12 +1227,13 @@
     }
 
     // 5. QUIZ INTERACTIONS
+    // 5. QUIZ INTERACTIONS
     function startQuiz() {
       const nameInput = document.getElementById('userName');
       userName = nameInput.value.trim() || "นักเรียนรู้";
       
       currentQuestionIndex = 0;
-      userAnswers = new Array(quizQuestions.length).fill(null);
+      userAnswers = Array.from({ length: quizQuestions.length }, () => []);
       
       showScreen('quizScreen');
       loadQuestion();
@@ -1236,66 +1267,136 @@
         card.classList.remove('slide-in-right');
         document.getElementById('questionText').innerText = currentQuestion.scenario;
         
-        // Generate options HTML
-        const container = document.getElementById('optionsContainer');
-        container.innerHTML = '';
-        
-        currentQuestion.options.forEach((opt, idx) => {
-          const isSelected = userAnswers[currentQuestionIndex] === idx;
-          const optionEl = document.createElement('button');
-          optionEl.onclick = () => selectOption(idx);
-          optionEl.className = `w-full text-left p-4 rounded-2xl transition-all duration-200 border flex items-start space-x-4 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${
-            isSelected 
-            ? 'bg-brand-500/10 border-brand-500 text-brand-700 dark:text-brand-300 ring-1 ring-brand-500 scale-[1.01] shadow-md shadow-brand-500/5' 
-            : 'bg-white/40 dark:bg-slate-900/30 hover:bg-slate-100 dark:hover:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:scale-[1.005]'
-          }`;
-          
-          let optionIcon = '🔘';
-          if (opt.vark === 'V') optionIcon = '👁️';
-          else if (opt.vark === 'A') optionIcon = '👂';
-          else if (opt.vark === 'R') optionIcon = '📖';
-          else if (opt.vark === 'K') optionIcon = '🖐️';
-
-          optionEl.innerHTML = `
-            <div class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-xl font-bold ${
-              isSelected 
-              ? 'bg-brand-500 text-white' 
-              : 'bg-slate-200/60 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-            }">
-              ${opt.letter}
-            </div>
-            <div class="flex-grow space-y-1">
-              <p class="text-sm font-medium leading-relaxed">${opt.text}</p>
-              <div class="flex items-center space-x-2 text-[10px] ${isSelected ? 'text-brand-600/80 dark:text-brand-400/80' : 'text-slate-400 dark:text-slate-500'}">
-                <span>ช่องรับสาร: ${optionIcon} ${opt.vark}</span>
-                <span>•</span>
-                <span>วงจรคิด: ${opt.kolb}</span>
-              </div>
-            </div>
-          `;
-          
-          container.appendChild(optionEl);
-        });
+        renderOptions();
+        updateNextButtonState();
       }, 100);
     }
 
-    function selectOption(optionIndex) {
-      userAnswers[currentQuestionIndex] = optionIndex;
+    function toggleOptionRank(optionIdx) {
+      const currentRanks = userAnswers[currentQuestionIndex] || [];
+      const existIdx = currentRanks.indexOf(optionIdx);
       
-      // Highlight selection and automatically navigate after a short delay
-      loadQuestion(); // Reload current view to update class states
+      if (existIdx !== -1) {
+        // Deselect: remove it, and the remaining ranks automatically slide up
+        currentRanks.splice(existIdx, 1);
+      } else {
+        // Select: append to the end of the ranking (allow ranking up to 4, but only top 3 get points)
+        currentRanks.push(optionIdx);
+      }
       
-      setTimeout(() => {
-        if (currentQuestionIndex < quizQuestions.length - 1) {
-          nextQuestion();
-        } else {
-          // Final question completed -> Run calculation loading
-          finishQuiz();
-        }
-      }, 250);
+      userAnswers[currentQuestionIndex] = currentRanks;
+      renderOptions();
+      updateNextButtonState();
     }
 
-    function nextQuestion() {
+    function renderOptions() {
+      const currentQuestion = quizQuestions[currentQuestionIndex];
+      const currentRanks = userAnswers[currentQuestionIndex] || [];
+      const container = document.getElementById('optionsContainer');
+      container.innerHTML = '';
+      
+      currentQuestion.options.forEach((opt, idx) => {
+        const rankIndex = currentRanks.indexOf(idx);
+        const isSelected = rankIndex !== -1;
+        
+        let selectStyles = '';
+        if (isSelected) {
+          if (rankIndex === 0) {
+            selectStyles = 'bg-brand-500/10 border-brand-500 text-brand-800 dark:text-brand-200 ring-2 ring-brand-500 scale-[1.01] shadow-md shadow-brand-500/5';
+          } else if (rankIndex === 1) {
+            selectStyles = 'bg-purple-500/5 border-purple-500/80 text-purple-800 dark:text-purple-300 ring-1 ring-purple-500 scale-[1.005]';
+          } else {
+            selectStyles = 'bg-slate-500/5 border-slate-500/60 text-slate-800 dark:text-slate-300 ring-1 ring-slate-400';
+          }
+        } else {
+          selectStyles = 'bg-white/40 dark:bg-slate-900/30 hover:bg-slate-100 dark:hover:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:scale-[1.002]';
+        }
+        
+        const optionEl = document.createElement('button');
+        optionEl.onclick = () => toggleOptionRank(idx);
+        optionEl.className = `w-full text-left p-4 rounded-2xl transition-all duration-200 border flex items-start space-x-4 focus:outline-none ${selectStyles}`;
+        
+        let optionIcon = '🔘';
+        if (opt.vark === 'V') optionIcon = '👁️';
+        else if (opt.vark === 'A') optionIcon = '👂';
+        else if (opt.vark === 'R') optionIcon = '📖';
+        else if (opt.vark === 'K') optionIcon = '🖐️';
+
+        let badgeHtml = '';
+        if (isSelected) {
+          if (rankIndex === 0) {
+            badgeHtml = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-500 text-white whitespace-nowrap">อันดับ 1 (ชอบที่สุด)</span>`;
+          } else if (rankIndex === 1) {
+            badgeHtml = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500 text-white whitespace-nowrap">อันดับ 2</span>`;
+          } else if (rankIndex === 2) {
+            badgeHtml = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-500 text-white whitespace-nowrap">อันดับ 3</span>`;
+          } else {
+            badgeHtml = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-400 text-white whitespace-nowrap">อันดับ 4</span>`;
+          }
+        }
+
+        optionEl.innerHTML = `
+          <div class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-xl font-bold ${
+            isSelected 
+            ? 'bg-brand-600 text-white' 
+            : 'bg-slate-200/60 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+          }">
+            ${opt.letter}
+          </div>
+          <div class="flex-grow space-y-1">
+            <div class="flex items-start justify-between gap-2">
+              <p class="text-sm font-medium leading-relaxed text-slate-800 dark:text-slate-200">${opt.text}</p>
+              ${badgeHtml}
+            </div>
+            <div class="flex items-center space-x-2 text-[10px] ${isSelected ? 'text-brand-600/80 dark:text-brand-400/80' : 'text-slate-400 dark:text-slate-500'}">
+              <span>ช่องรับสาร: ${optionIcon} ${opt.vark}</span>
+              <span>•</span>
+              <span>วงจรคิด: ${opt.kolb}</span>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(optionEl);
+      });
+    }
+
+    function updateNextButtonState() {
+      const currentRanks = userAnswers[currentQuestionIndex] || [];
+      const btnNext = document.getElementById('btnNext');
+      const btnNextText = document.getElementById('btnNextText');
+      const btnClearRanks = document.getElementById('btnClearRanks');
+      
+      if (currentRanks.length > 0) {
+        btnNext.removeAttribute('disabled');
+      } else {
+        btnNext.setAttribute('disabled', 'true');
+      }
+      
+      if (currentRanks.length > 0) {
+        btnClearRanks.removeAttribute('disabled');
+        btnClearRanks.classList.remove('opacity-40');
+      } else {
+        btnClearRanks.setAttribute('disabled', 'true');
+        btnClearRanks.classList.add('opacity-40');
+      }
+      
+      if (currentQuestionIndex === quizQuestions.length - 1) {
+        btnNextText.innerText = "ประมวลผลลัพธ์";
+      } else {
+        btnNextText.innerText = "ถัดไป";
+      }
+    }
+
+    function clearCurrentRanks() {
+      userAnswers[currentQuestionIndex] = [];
+      renderOptions();
+      updateNextButtonState();
+    }
+
+    function goToNextQuestion() {
+      const currentRanks = userAnswers[currentQuestionIndex] || [];
+      if (currentRanks.length === 0) return;
+      
       if (currentQuestionIndex < quizQuestions.length - 1) {
         const card = document.getElementById('questionCard');
         card.classList.add('slide-out-left');
@@ -1305,6 +1406,8 @@
           currentQuestionIndex++;
           loadQuestion();
         }, 200);
+      } else {
+        finishQuiz();
       }
     }
 
@@ -1358,11 +1461,18 @@
       const vark = { V: 0, A: 0, R: 0, K: 0 };
       const kolb = { CE: 0, RO: 0, AC: 0, AE: 0 };
       
-      userAnswers.forEach((selectedIdx, qIdx) => {
-        if (selectedIdx !== null) {
-          const selectedOption = quizQuestions[qIdx].options[selectedIdx];
-          vark[selectedOption.vark]++;
-          kolb[selectedOption.kolb]++;
+      userAnswers.forEach((rankedArray, qIdx) => {
+        if (rankedArray && rankedArray.length > 0) {
+          rankedArray.forEach((selectedIdx, rankOrder) => {
+            const selectedOption = quizQuestions[qIdx].options[selectedIdx];
+            // Rank 1 (rankOrder 0) -> +3 points
+            // Rank 2 (rankOrder 1) -> +2 points
+            // Rank 3 (rankOrder 2) -> +1 point
+            // Rank 4 (rankOrder 3) -> 0 points
+            const weight = Math.max(0, 3 - rankOrder);
+            vark[selectedOption.vark] += weight;
+            kolb[selectedOption.kolb] += weight;
+          });
         }
       });
       
@@ -1505,7 +1615,7 @@
 
     // 8. CUSTOM DYNAMIC SVG RADAR CHART GENERATOR
     function renderVARKRadarChart(scores) {
-      const maxScore = quizQuestions.length; // Max score for 1 category is the number of questions
+      const maxScore = quizQuestions.length * 3; // Max score for 1 category is the number of questions * 3
       const cx = 150, cy = 150, r = 100;
       
       // Calculate points, ensure minimum values so plot doesn't shrink to 0 completely
@@ -1557,7 +1667,7 @@
 
     // 9. CUSTOM DYNAMIC SVG KOLB 2D GRID SCATTER PLOTTER
     function renderKolbGridChart(scores) {
-      const maxScore = quizQuestions.length; // Max score for 1 category
+      const maxScore = quizQuestions.length * 3; // Max score for 1 category is 27
       const cx = 150, cy = 150, r = 100;
       
       // Raw axis differences
